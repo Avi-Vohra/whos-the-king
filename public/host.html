@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Who's the King? — Host</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="host.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>&#128041; Who's the King?</h1>
+      <div id="roomPill" class="pill hidden"></div>
+    </div>
+
+    <!-- LOBBY -->
+    <section id="lobbySection">
+      <div class="card room-code-banner">
+        <div class="hint">Players: open this app on your phone and join with the code</div>
+        <div class="code" id="roomCode">----</div>
+        <div class="hint" id="lobbyCount">Waiting for players…</div>
+      </div>
+      <div class="lobby-grid" id="lobbyGrid"></div>
+      <div class="controls-bar">
+        <button class="btn" id="startGameBtn" disabled>Start Game</button>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="gameSection" class="hidden">
+      <div class="round-header">
+        <div class="pill" id="roundPill">Round 1 / 8</div>
+        <div class="pill" id="phasePill">Bidding</div>
+      </div>
+
+      <!-- bidding -->
+      <div id="biddingView" class="hidden">
+        <div class="card item-card">
+          <span class="item-type-tag">ITEM UP FOR BID</span>
+          <div id="itemIcon" class="item-icon-wrap"></div>
+          <h2 id="itemName">Item Name</h2>
+          <p id="itemFlavor">Flavor text</p>
+        </div>
+        <div class="bid-progress-grid" id="bidProgressGrid"></div>
+        <div class="controls-bar">
+          <button class="btn secondary" id="forceRevealBtn">Reveal Bids Now</button>
+        </div>
+      </div>
+
+      <!-- bid reveal -->
+      <div id="revealView" class="hidden">
+        <div class="card">
+          <h2 id="revealItemName">Item Name</h2>
+          <div id="revealRows"></div>
+          <p id="revealNote" class="hidden" style="text-align:center; font-weight:800; font-size:1.2rem; margin-top:0.8rem;"></p>
+        </div>
+      </div>
+
+      <!-- effect stage -->
+      <div id="effectView" class="hidden">
+        <div class="card effect-stage" id="effectStage"></div>
+      </div>
+
+      <div class="controls-bar" id="continueBar">
+        <button class="btn" id="continueBtn">Continue</button>
+      </div>
+
+      <!-- leaderboard -->
+      <div id="leaderboardView" class="hidden">
+        <div class="card">
+          <h2>Live Leaderboard</h2>
+          <div class="leaderboard-list" id="leaderboardList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- END -->
+    <section id="endSection" class="hidden"></section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="characters.js"></script>
+  <script src="item-icons.js"></script>
+  <script src="host.js"></script>
+</body>
+</html>

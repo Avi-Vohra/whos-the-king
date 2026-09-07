@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Who's the King?</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { min-height: 100%; }
+    .landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem;
+      padding: 2rem;
+      text-align: center;
+    }
+    .landing h1 {
+      font-size: 3rem;
+      color: var(--cream);
+      text-shadow: 0 4px 0 var(--brown-dark);
+      margin: 0;
+    }
+    .landing p { color: var(--cream); font-size: 1.1rem; max-width: 32rem; }
+    .choices { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+    .choices .btn { min-width: 12rem; font-size: 1.3rem; }
+  </style>
+</head>
+<body>
+  <div class="landing">
+    <h1>&#128041; Who's the King?</h1>
+    <p>Bid, betray, and claw your way to the top of the pride. One host screen, everyone else joins from their phone.</p>
+    <div class="choices">
+      <a class="btn" href="host.html">Host a Game</a>
+      <a class="btn secondary" href="player.html">Join a Game</a>
+    </div>
+  </div>
+</body>
+</html>

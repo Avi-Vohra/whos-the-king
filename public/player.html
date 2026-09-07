@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Who's the King? — Play</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="player.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>&#128041; Who's the King?</h1>
+      <div id="roomPill" class="pill hidden"></div>
+    </div>
+
+    <!-- JOIN -->
+    <section id="joinSection">
+      <div class="card join-card">
+        <h2>Join a Game</h2>
+        <div class="stack">
+          <input type="text" id="codeInput" placeholder="Room Code" maxlength="4" style="text-transform:uppercase; text-align:center; letter-spacing:0.2em; font-weight:900;" />
+          <input type="text" id="nameInput" placeholder="Your Name" maxlength="16" />
+          <button class="btn" id="joinBtn">Join</button>
+          <div class="error-msg" id="joinError"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARACTER SELECT -->
+    <section id="charSection" class="hidden">
+      <div class="card">
+        <h2 style="text-align:center;">Pick Your Lion</h2>
+        <div class="char-grid" id="charGrid"></div>
+      </div>
+    </section>
+
+    <!-- WAITING FOR GAME START -->
+    <section id="waitingStartSection" class="hidden">
+      <div class="card waiting-box">
+        <div class="spinner">🦁</div>
+        <h2 id="waitingChosenName"></h2>
+        <p>Waiting for the host to start the game…</p>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="gameSection" class="hidden">
+      <div class="card">
+        <div class="me-header">
+          <div id="meAvatar"></div>
+          <div>
+            <div class="name" id="meName"></div>
+            <div id="meCharName" style="font-size:0.85rem; color:#876;"></div>
+          </div>
+        </div>
+        <div class="stat-bar">
+          <div class="stat-box"><div class="label">Roars</div><div class="value" id="meRoars">100</div></div>
+          <div class="stat-box"><div class="label">Strength</div><div class="value" id="meStrength">0</div></div>
+        </div>
+      </div>
+
+      <div id="spectatorBanner" class="spectator-banner hidden">You've been eliminated — watching the rest of the game!</div>
+
+      <div id="roundInfo" class="pill" style="display:block; text-align:center; margin-bottom:0.6rem;"></div>
+
+      <!-- bidding -->
+      <div id="biddingView" class="hidden card">
+        <div class="item-card">
+          <div id="itemIcon" class="item-icon-wrap"></div>
+          <h2 id="itemName"></h2>
+          <p id="itemFlavor"></p>
+        </div>
+        <div id="bidForm">
+          <div class="bid-input-row">
+            <input type="number" id="bidInput" min="0" placeholder="0" />
+            <button class="btn" id="submitBidBtn">Bid</button>
+          </div>
+          <div class="quick-bids" id="quickBids"></div>
+          <button class="btn secondary" id="passBtn" style="width:100%; margin-top:0.6rem;">Pass / No Bid</button>
+        </div>
+        <div id="bidSubmittedNote" class="hidden" style="text-align:center; margin-top:0.8rem; font-weight:800; color:var(--green);">Bid submitted! Waiting for others…</div>
+        <div id="passedNote" class="hidden" style="text-align:center; margin-top:0.8rem; font-weight:800; color:var(--brown);">You passed. Waiting for others…</div>
+      </div>
+
+      <!-- target select -->
+      <div id="targetSelectView" class="hidden card">
+        <h2 id="targetPrompt"></h2>
+        <div class="target-list" id="targetList"></div>
+        <button class="btn" id="confirmTargetBtn" disabled>Confirm</button>
+      </div>
+
+      <!-- reveal / effect -->
+      <div id="revealEffectView" class="hidden card">
+        <div id="revealEffectContent"></div>
+      </div>
+
+      <!-- leaderboard -->
+      <div id="leaderboardView" class="hidden card">
+        <h2 style="text-align:center;">Leaderboard</h2>
+        <div class="leaderboard-list-p" id="leaderboardListP"></div>
+      </div>
+    </section>
+
+    <!-- END -->
+    <section id="endSection" class="hidden"></section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="characters.js"></script>
+  <script src="item-icons.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>

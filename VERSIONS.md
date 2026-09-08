@@ -34,3 +34,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v8** — UI polish: button hover/focus-visible states, subtle card top sheen. Fixed two confusing item icons: Hyena Pack looked identical to Prime Territory's hills (now a pack of red-eyed toothy hyena silhouettes); Thorn Bush Ambush's red circle+cross read as a medical symbol (now lurking predator eyes in the bush).
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `f755eb0`
+
+- **v9** — Found via manual in-browser playtest, not automated tests: the bid winner's target-select screen depended entirely on a one-time socket event. Any reconnect/reload during that phase (phone screen lock, backgrounded tab, flaky wifi — all common mid-party) permanently soft-locked them out of picking a target for that round, silently falling back to a random pick 30s later. Fixed by rebuilding the prompt from synced state on render, so it survives reconnects.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `d0edd30`

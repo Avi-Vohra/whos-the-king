@@ -300,11 +300,14 @@ function buildChopped() {
   const arms = arm(52, 112, 34, 150, 13, '#a8672f', '#5c3a1e') + arm(108, 112, 126, 150, 13, '#a8672f', '#5c3a1e');
 
   const face = BROW.crooked(HEAD_CX, HEAD_CY - 4)
-    + EYE.asymmetric(HEAD_CX, HEAD_CY - 2)
+    + `<circle cx="${HEAD_CX - 10}" cy="${HEAD_CY - 4}" r="6.4" fill="#fff"/><circle cx="${HEAD_CX - 9}" cy="${HEAD_CY - 3}" r="3.6" fill="#241305"/><circle cx="${HEAD_CX - 7.4}" cy="${HEAD_CY - 5.6}" r="1.2" fill="#fff"/>
+       <path d="M ${HEAD_CX + 4} ${HEAD_CY + 3} Q ${HEAD_CX + 9} ${HEAD_CY} ${HEAD_CX + 14} ${HEAD_CY + 3.4}" stroke="#241305" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
     + `<path d="M ${HEAD_CX - 21} ${HEAD_CY - 8} L ${HEAD_CX - 9} ${HEAD_CY - 15}" stroke="#8a4520" stroke-width="2.4" stroke-linecap="round"/>
-       <path d="M ${HEAD_CX + 15} ${HEAD_CY + 4} L ${HEAD_CX + 21} ${HEAD_CY + 12}" stroke="#8a4520" stroke-width="2" stroke-linecap="round" opacity="0.8"/>`
-    + nose(HEAD_CX - 2, HEAD_CY + 10, '#4a2712')
+       <path d="M ${HEAD_CX + 15} ${HEAD_CY + 4} L ${HEAD_CX + 21} ${HEAD_CY + 12}" stroke="#8a4520" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+       <path d="M ${HEAD_CX - 12} ${HEAD_CY - 10} L ${HEAD_CX - 6} ${HEAD_CY + 6}" stroke="#7a3010" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>`
+    + `<ellipse cx="${HEAD_CX - 4}" cy="${HEAD_CY + 9}" rx="5.5" ry="4" fill="#4a2712"/><ellipse cx="${HEAD_CX - 5.5}" cy="${HEAD_CY + 8}" rx="1.4" ry="1" fill="#7a4a24"/>`
     + MOUTH.crookedGap(HEAD_CX, HEAD_CY + 15)
+    + `<path d="M ${HEAD_CX + 6} ${HEAD_CY + 14} L ${HEAD_CX + 7.5} ${HEAD_CY + 20} L ${HEAD_CX + 4} ${HEAD_CY + 15.5} Z" fill="#fdf6e8"/>`
     + `<circle cx="${HEAD_CX - 14}" cy="${HEAD_CY + 20}" r="1.1" fill="#5c3a1e"/><circle cx="${HEAD_CX - 9}" cy="${HEAD_CY + 22}" r="1.1" fill="#5c3a1e"/><circle cx="${HEAD_CX - 4}" cy="${HEAD_CY + 20.5}" r="1.1" fill="#5c3a1e"/>`;
 
   return `<defs>${g.defs}</defs>`

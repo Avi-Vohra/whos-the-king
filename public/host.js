@@ -697,10 +697,29 @@ function renderEnd(state) {
   endSection.innerHTML = '';
   const container = document.createElement('div');
   container.className = 'crown-screen';
+
+  const confetti = document.createElement('div');
+  confetti.className = 'confetti-field';
+  const confettiColors = ['#f5a623', '#ffd166', '#4caf7d', '#d9483a', '#fff6e3', '#e8752c'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = confettiColors[i % confettiColors.length];
+    piece.style.animationDelay = `${(Math.random() * 0.6).toFixed(2)}s`;
+    piece.style.animationDuration = `${(2.2 + Math.random() * 1.6).toFixed(2)}s`;
+    piece.style.setProperty('--drift', `${(Math.random() * 80 - 40).toFixed(0)}px`);
+    confetti.appendChild(piece);
+  }
+  container.appendChild(confetti);
+
+  const content = document.createElement('div');
+  content.className = 'crown-content';
+
   const crown = document.createElement('div');
   crown.className = 'crown-emoji';
   crown.textContent = '👑';
-  container.appendChild(crown);
+  content.appendChild(crown);
 
   const avatarsRow = document.createElement('div');
   avatarsRow.style.display = 'flex';
@@ -710,7 +729,7 @@ function renderEnd(state) {
   for (const w of winners) {
     avatarsRow.appendChild(charAvatar(w.character, isMulti ? 150 : 220, '', true));
   }
-  container.appendChild(avatarsRow);
+  content.appendChild(avatarsRow);
 
   const h1 = document.createElement('h1');
   if (isMulti) {
@@ -720,13 +739,14 @@ function renderEnd(state) {
     const w = winners[0];
     h1.textContent = `${w.name} has earned the throne — and the night in The Lion's Den!`;
   }
-  container.appendChild(h1);
+  content.appendChild(h1);
 
   const sub = document.createElement('p');
   sub.style.color = 'var(--cream)';
   sub.style.fontSize = '1.4rem';
   sub.textContent = `Final Strength: ${winners[0].strength}`;
-  container.appendChild(sub);
+  content.appendChild(sub);
+  container.appendChild(content);
 
   endSection.appendChild(container);
 }

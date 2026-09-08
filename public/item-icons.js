@@ -187,8 +187,12 @@ const ITEM_BUILDERS = {
         <path d="M 26 60 L 18 46"/><path d="M 34 52 L 30 36"/><path d="M 46 48 L 46 30"/>
         <path d="M 58 48 L 62 30"/><path d="M 68 54 L 78 40"/><path d="M 74 62 L 86 52"/>
       </g>
-      <circle cx="50" cy="64" r="12" fill="#d64545"/>
-      <path d="M 42 64 L 58 64 M 50 56 L 50 72" stroke="#a02525" stroke-width="1.6"/>`;
+      <g fill="#241305">
+        <ellipse cx="42" cy="62" rx="4" ry="5"/><ellipse cx="58" cy="62" rx="4" ry="5"/>
+      </g>
+      <g fill="#d64545">
+        <circle cx="42" cy="62" r="1.6"/><circle cx="58" cy="62" r="1.6"/>
+      </g>`;
     return badge('#d9e8c4', '#7a9a52', inner);
   },
 };

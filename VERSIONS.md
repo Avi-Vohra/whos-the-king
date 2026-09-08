@@ -42,3 +42,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v10** — Victory roar: synthesized crowd/growl sound on the crown reveal via Web Audio API (oscillator sweep + filtered noise) — no external audio asset needed, plays once per game end.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `e6a3931`
+
+- **v11** — Bald Lion's crossed arms were tucked so tight to the body he read as visibly narrower/smaller than the rest of the roster; flared the elbows outward so the pose is both clearer and gives him proper silhouette presence. Re-ran self-audit sims at 4/6/8 players post-fix: all clean (Tren/Baboon exactly once, no self-targeting, correct endings).
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `c929542`

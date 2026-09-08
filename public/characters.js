@@ -210,15 +210,15 @@ function buildAvi() {
   // Arms held out and bent - a distinct bulging bicep shape (not just a
   // thick stroke) at the top of each arm, tapering to a narrower forearm.
   const arms = `
-    <path d="M 28 106 Q 2 118 6 146 Q 8 158 18 156 Q 10 138 14 122 Q 18 108 34 112 Z" fill="#d98a3f"/>
-    <ellipse cx="14" cy="130" rx="15" ry="19" fill="#e8a352" opacity="0.9" transform="rotate(-18 14 130)"/>
-    <ellipse cx="9" cy="124" rx="6" ry="10" fill="#fbdcae" opacity="0.5" transform="rotate(-18 9 124)"/>
-    <path d="M 12 150 Q 16 170 42 174" stroke="#c9762a" stroke-width="19" fill="none" stroke-linecap="round"/>
+    <path d="M 28 106 Q 12 118 14 146 Q 16 158 18 156 Q 18 138 20 122 Q 18 108 34 112 Z" fill="#d98a3f"/>
+    <ellipse cx="20" cy="130" rx="13" ry="19" fill="#e8a352" opacity="0.9" transform="rotate(-18 20 130)"/>
+    <ellipse cx="16" cy="124" rx="6" ry="10" fill="#fbdcae" opacity="0.5" transform="rotate(-18 16 124)"/>
+    <path d="M 18 150 Q 22 170 42 174" stroke="#c9762a" stroke-width="19" fill="none" stroke-linecap="round"/>
     <circle cx="44" cy="175" r="13" fill="#b8721f"/>
-    <path d="M 132 106 Q 158 118 154 146 Q 152 158 142 156 Q 150 138 146 122 Q 142 108 126 112 Z" fill="#d98a3f"/>
-    <ellipse cx="146" cy="130" rx="15" ry="19" fill="#e8a352" opacity="0.9" transform="rotate(18 146 130)"/>
-    <ellipse cx="151" cy="124" rx="6" ry="10" fill="#fbdcae" opacity="0.5" transform="rotate(18 151 124)"/>
-    <path d="M 148 150 Q 144 170 118 174" stroke="#c9762a" stroke-width="19" fill="none" stroke-linecap="round"/>
+    <path d="M 132 106 Q 148 118 146 146 Q 144 158 142 156 Q 142 138 140 122 Q 142 108 126 112 Z" fill="#d98a3f"/>
+    <ellipse cx="140" cy="130" rx="13" ry="19" fill="#e8a352" opacity="0.9" transform="rotate(18 140 130)"/>
+    <ellipse cx="144" cy="124" rx="6" ry="10" fill="#fbdcae" opacity="0.5" transform="rotate(18 144 124)"/>
+    <path d="M 142 150 Q 138 170 118 174" stroke="#c9762a" stroke-width="19" fill="none" stroke-linecap="round"/>
     <circle cx="116" cy="175" r="13" fill="#b8721f"/>`;
 
   const legs = `${leg(58, 168, 213, 26, '#c9762a', '#8a4f1f')}${leg(102, 168, 213, 26, '#c9762a', '#8a4f1f')}

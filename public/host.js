@@ -158,6 +158,8 @@ function renderLionessCinematic(state) {
     <div class="lioness-caption">👑 The Most Coveted Prize on the Savanna 👑</div>`;
 }
 
+let lastItemKey = null;
+
 function renderBidding(state) {
   el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';
   el('itemCard').classList.toggle('tren-glow', !!state.currentItem && state.currentItem.id === 'tren');
@@ -172,6 +174,18 @@ function renderBidding(state) {
   } else {
     el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
     el('itemIcon').innerHTML = state.currentItem ? itemIconSVG(state.currentItem.id, 96) : '';
+  }
+
+  const itemKey = state.currentItem ? `${state.round}:${state.currentItem.id}` : null;
+  if (itemKey && itemKey !== lastItemKey) {
+    lastItemKey = itemKey;
+    const card = el('itemCard');
+    card.classList.remove('card-flip-in');
+    const iconWrap = el('itemIcon');
+    iconWrap.classList.remove('icon-spin-in');
+    void card.offsetWidth;
+    card.classList.add('card-flip-in');
+    if (!isLioness) iconWrap.classList.add('icon-spin-in');
   }
 
   const grid = el('bidProgressGrid');

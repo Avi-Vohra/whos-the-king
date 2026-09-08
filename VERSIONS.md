@@ -38,3 +38,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v9** — Found via manual in-browser playtest, not automated tests: the bid winner's target-select screen depended entirely on a one-time socket event. Any reconnect/reload during that phase (phone screen lock, backgrounded tab, flaky wifi — all common mid-party) permanently soft-locked them out of picking a target for that round, silently falling back to a random pick 30s later. Fixed by rebuilding the prompt from synced state on render, so it survives reconnects.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `d0edd30`
+
+- **v10** — Victory roar: synthesized crowd/growl sound on the crown reveal via Web Audio API (oscillator sweep + filtered noise) — no external audio asset needed, plays once per game end.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `e6a3931`

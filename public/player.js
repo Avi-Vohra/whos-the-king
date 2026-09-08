@@ -180,7 +180,18 @@ function renderGame(state) {
     return;
   }
 
-  if (state.phase === 'target_select' && pendingTargetPrompt && me.active) {
+  const amITargetWinner = state.phase === 'target_select' && me.active
+    && state.bidReveal && state.bidReveal.winnerId === myPlayerId;
+  if (amITargetWinner) {
+    if (!pendingTargetPrompt) {
+      // The one-time target-select-prompt socket event was missed (e.g. a
+      // reconnect/reload mid-round) - rebuild the same prompt from synced
+      // state so the winner isn't stuck unable to pick a target.
+      const eligible = state.players.filter((p) => p.active && p.id !== myPlayerId);
+      const count = Math.min(state.currentItem && state.currentItem.id === 'tren' ? 2 : 1, eligible.length);
+      pendingTargetPrompt = { itemId: state.currentItem && state.currentItem.id, itemName: state.currentItem && state.currentItem.name, count, eligible };
+      selectedTargets = [];
+    }
     el('targetSelectView').classList.remove('hidden');
     renderTargetSelect(state);
     return;

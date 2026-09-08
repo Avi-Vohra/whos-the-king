@@ -318,13 +318,15 @@ function buildChopped() {
 }
 
 function buildTiny() {
-  const s = 0.68;
+  const s = 0.88;
   const g = furGrad('#dd8a3f', '#b3611f');
   const mane = jaggedMane(HEAD_CX, HEAD_CY, 24 * s, 40 * s, 9, '#6f2f14') + jaggedMane(HEAD_CX, HEAD_CY, 22 * s, 34 * s, 9, '#8a3f22');
   const shoulderY = HEAD_CY + 44 * s;
-  const torso = `<path d="M ${80 - 26 * s} ${shoulderY} Q 80 ${shoulderY - 8 * s} ${80 + 26 * s} ${shoulderY}
-      L ${80 + 24 * s} ${shoulderY + 40 * s} Q 80 ${shoulderY + 48 * s} ${80 - 24 * s} ${shoulderY + 40 * s} Z" fill="url(#${g.id})"/>`;
-  const legs = standardLegs(80, shoulderY + 40 * s, shoulderY + 40 * s + 26 * s, 14 * s, 12 * s, '#8a3f22', '#6f2f14');
+  const hipY = shoulderY + 40 * s;
+  const torso = `<path d="M ${80 - 27 * s} ${shoulderY} Q 80 ${shoulderY - 8 * s} ${80 + 27 * s} ${shoulderY}
+      Q ${80 + 30 * s} ${shoulderY + 20 * s} ${80 + 21 * s} ${hipY} Q 80 ${hipY + 8 * s} ${80 - 21 * s} ${hipY}
+      Q ${80 - 30 * s} ${shoulderY + 20 * s} ${80 - 27 * s} ${shoulderY} Z" fill="url(#${g.id})"/>`;
+  const legs = standardLegs(80, hipY, hipY + 26 * s, 14 * s, 12 * s, '#8a3f22', '#6f2f14');
   // Puffed-up posture: fists raised near shoulders.
   const arms = `<path d="M ${80 - 26 * s} ${shoulderY + 4 * s} Q ${80 - 40 * s} ${shoulderY - 6 * s} ${80 - 30 * s} ${shoulderY - 20 * s}"
       stroke="#8a3f22" stroke-width="${9 * s}" fill="none" stroke-linecap="round"/>
@@ -335,7 +337,7 @@ function buildTiny() {
   const face = BROW.angry(HEAD_CX, HEAD_CY - 5) + EYE.angry(HEAD_CX, HEAD_CY - 2) + nose(HEAD_CX, HEAD_CY + 8, '#4a2712') + MOUTH.zigzag(HEAD_CX, HEAD_CY + 12);
 
   return `<defs>${g.defs}</defs>`
-    + tail(80 + 22 * s, shoulderY + 20 * s, '#8a3f22', '#6f2f14', 1)
+    + tail(80 + 18 * s, hipY - 4 * s, '#8a3f22', '#6f2f14', 1)
     + legs + torso + arms + mane
     + headBase(`url(#${g.id})`, HEAD_CX, HEAD_CY, 24 * s, '#a85228', '#8a3f22', '#e9b57c')
     + face;

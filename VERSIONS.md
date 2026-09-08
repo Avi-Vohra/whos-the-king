@@ -22,3 +22,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v5** — Background overhaul: replaced flat gradient with layered savanna scene (2 hill layers, 5 acacia tree silhouettes, jagged grass texture) as a fixed bottom band behind all screens. Verified on both host and player (narrow phone width).
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `8488085`
+
+- **v6** — Chopped Lion pushed funnier-ugly (derp/squint mismatched eyes, snaggletooth, bulbous nose). Item reveal now does a real 3D card-flip + icon spin-in every new item (previously the pop-in animation never replayed after the first item). Victory screen gets a falling confetti burst behind the crown.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `5d6411c`

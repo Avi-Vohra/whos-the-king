@@ -8,6 +8,11 @@ const endSection = el('endSection');
 let latestState = null;
 let lastEffectKey = null;
 let lastPoisonKey = null;
+let lastFightTapsA = 0;
+let lastFightTapsB = 0;
+let fightCountdownInterval = null;
+let fightTimerInterval = null;
+let lastFightKey = null;
 
 function charAvatar(characterId, size, extraClass = '', full = false) {
   const div = document.createElement('div');
@@ -106,12 +111,13 @@ function renderGame(state) {
     bidding: 'Bidding Open',
     bid_reveal: 'Revealing Bids…',
     target_select: 'Choosing Target…',
+    fight: 'FIGHT!',
     effect_reveal: 'Resolving…',
     leaderboard: 'Leaderboard',
   };
   el('phasePill').textContent = phaseLabels[state.phase] || '';
 
-  const views = ['biddingView', 'revealView', 'effectView', 'leaderboardView'];
+  const views = ['biddingView', 'revealView', 'fightView', 'effectView', 'leaderboardView'];
   views.forEach((v) => el(v).classList.add('hidden'));
   el('continueBar').classList.add('hidden');
 
@@ -121,6 +127,9 @@ function renderGame(state) {
   } else if (state.phase === 'bid_reveal' || state.phase === 'target_select') {
     el('revealView').classList.remove('hidden');
     renderReveal(state);
+  } else if (state.phase === 'fight') {
+    el('fightView').classList.remove('hidden');
+    renderFight(state);
   } else if (state.phase === 'effect_reveal') {
     el('effectView').classList.remove('hidden');
     el('continueBar').classList.remove('hidden');
@@ -214,6 +223,127 @@ function renderReveal(state) {
     note.classList.remove('hidden');
   } else {
     note.classList.add('hidden');
+  }
+}
+
+const FIGHT_ITEM_NAMES = { hyena_pack: 'Hyena Pack', croc_ambush: 'Croc Ambush' };
+
+function runFightCountdown() {
+  if (fightCountdownInterval) clearInterval(fightCountdownInterval);
+  let n = 3;
+  const setText = (t) => { const node = document.getElementById('fightCountdownNum'); if (node) node.textContent = t; };
+  setText(String(n));
+  fightCountdownInterval = setInterval(() => {
+    n -= 1;
+    if (n > 0) setText(String(n));
+    else if (n === 0) setText('FIGHT!');
+    else { clearInterval(fightCountdownInterval); fightCountdownInterval = null; }
+  }, 1000);
+}
+
+function renderFight(state) {
+  const stage = el('fightStage');
+  const f = state.fight;
+  if (!f || !f.attacker || !f.defender) { stage.innerHTML = ''; return; }
+  const a = f.attacker, b = f.defender;
+
+  const fightKey = f.attacker.id + f.defender.id + state.round;
+  if (fightKey !== lastFightKey) { lastFightKey = fightKey; lastFightTapsA = 0; lastFightTapsB = 0; }
+
+  const tapsA = f.taps[a.id] || 0;
+  const tapsB = f.taps[b.id] || 0;
+  const hitA = tapsA > lastFightTapsA;
+  const hitB = tapsB > lastFightTapsB;
+  lastFightTapsA = tapsA;
+  lastFightTapsB = tapsB;
+
+  stage.innerHTML = '';
+  stage.classList.toggle('fight-shake', f.stage === 'active' && (hitA || hitB));
+
+  const title = document.createElement('h2');
+  title.className = 'fight-title';
+  title.textContent = FIGHT_ITEM_NAMES[f.itemId] || 'FIGHT';
+  stage.appendChild(title);
+
+  const arena = document.createElement('div');
+  arena.className = 'fight-arena';
+
+  const leftSide = document.createElement('div');
+  leftSide.className = 'fight-fighter' + (hitA ? ' hit-flash' : '');
+  leftSide.appendChild(charAvatar(a.character, 170, '', true));
+  const leftName = document.createElement('div');
+  leftName.className = 'fight-name';
+  leftName.textContent = a.name;
+  leftSide.appendChild(leftName);
+
+  const vs = document.createElement('div');
+  vs.className = 'fight-vs';
+  vs.textContent = 'VS';
+
+  const rightSide = document.createElement('div');
+  rightSide.className = 'fight-fighter fight-fighter-right' + (hitB ? ' hit-flash' : '');
+  const rightAvatarWrap = charAvatar(b.character, 170, '', true);
+  rightAvatarWrap.classList.add('mirror');
+  rightSide.appendChild(rightAvatarWrap);
+  const rightName = document.createElement('div');
+  rightName.className = 'fight-name';
+  rightName.textContent = b.name;
+  rightSide.appendChild(rightName);
+
+  arena.appendChild(leftSide);
+  arena.appendChild(vs);
+  arena.appendChild(rightSide);
+  stage.appendChild(arena);
+
+  if (f.stage === 'countdown') {
+    const cd = document.createElement('div');
+    cd.className = 'fight-countdown';
+    cd.id = 'fightCountdownNum';
+    cd.textContent = '3';
+    stage.appendChild(cd);
+    runFightCountdown();
+  } else if (f.stage === 'active') {
+    const bonusA = Math.max(0, Math.floor((a.strength - b.strength) / 10));
+    const bonusB = Math.max(0, Math.floor((b.strength - a.strength) / 10));
+    const scoreA = tapsA + bonusA;
+    const scoreB = tapsB + bonusB;
+    const total = Math.max(1, scoreA + scoreB);
+    const pctA = Math.round((scoreA / total) * 100);
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'fight-bar-wrap';
+    const barA = document.createElement('div');
+    barA.className = 'fight-bar-a';
+    barA.style.width = pctA + '%';
+    const barB = document.createElement('div');
+    barB.className = 'fight-bar-b';
+    barB.style.width = (100 - pctA) + '%';
+    barWrap.appendChild(barA);
+    barWrap.appendChild(barB);
+    stage.appendChild(barWrap);
+
+    const tapLabels = document.createElement('div');
+    tapLabels.className = 'fight-tap-labels';
+    tapLabels.innerHTML = `<span>${tapsA} taps${bonusA ? ` (+${bonusA} STR)` : ''}</span><span>${tapsB} taps${bonusB ? ` (+${bonusB} STR)` : ''}</span>`;
+    stage.appendChild(tapLabels);
+
+    const timer = document.createElement('div');
+    timer.className = 'fight-timer';
+    timer.id = 'fightTimerNum';
+    timer.textContent = `${Math.max(0, (f.endsAt - Date.now()) / 1000).toFixed(1)}s`;
+    stage.appendChild(timer);
+
+    if (fightTimerInterval) clearInterval(fightTimerInterval);
+    fightTimerInterval = setInterval(() => {
+      const node = document.getElementById('fightTimerNum');
+      if (!node) { clearInterval(fightTimerInterval); fightTimerInterval = null; return; }
+      const rem = Math.max(0, (f.endsAt - Date.now()) / 1000);
+      node.textContent = `${rem.toFixed(1)}s`;
+      if (rem <= 0) { clearInterval(fightTimerInterval); fightTimerInterval = null; }
+    }, 100);
+  } else if (fightTimerInterval) {
+    clearInterval(fightTimerInterval);
+    fightTimerInterval = null;
   }
 }
 

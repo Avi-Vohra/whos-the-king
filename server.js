@@ -45,6 +45,9 @@ function pickTagline(room) {
 }
 const BID_TIME_MS = 30000;
 const TARGET_SELECT_TIME_MS = 30000;
+const FIGHT_COUNTDOWN_MS = 3000;
+const FIGHT_DURATION_MS = 5000;
+const FIGHT_LOSS_PENALTY = 15;
 const MIN_PLAYERS = 2;
 
 const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
@@ -85,9 +88,14 @@ function makeRoom() {
     winnerId: null,
     pendingPoison: null, // { targetId, targetName }
     lastPoisonResult: null,
+    pendingVultureMark: null, // { targetId, targetName }
+    lastVultureResult: null,
     lastEffectResult: null,
     bidTimer: null,
     targetTimer: null,
+    countdownTimer: null,
+    fightTimer: null,
+    fight: null,
     endResult: null,
     usedTaglines: new Set(),
   };
@@ -151,6 +159,20 @@ function leaderboardData(room) {
   return players.map(publicPlayer);
 }
 
+function fightPublic(room) {
+  if (!room.fight) return null;
+  const attacker = room.players.get(room.fight.attackerId);
+  const defender = room.players.get(room.fight.defenderId);
+  return {
+    itemId: room.fight.itemId,
+    stage: room.fight.stage,
+    endsAt: room.fight.endsAt,
+    attacker: attacker ? publicPlayer(attacker) : null,
+    defender: defender ? publicPlayer(defender) : null,
+    taps: { [room.fight.attackerId]: room.fight.taps[room.fight.attackerId] || 0, [room.fight.defenderId]: room.fight.taps[room.fight.defenderId] || 0 },
+  };
+}
+
 function syncRoom(room) {
   const base = roomSummary(room);
 
@@ -162,8 +184,10 @@ function syncRoom(room) {
       bidReveal: room.phase === 'bid_reveal' || room.phase === 'target_select' || room.phase === 'effect_reveal'
         ? bidRevealPayload(room)
         : null,
+      fight: fightPublic(room),
       effectResult: room.lastEffectResult,
       poisonResult: room.lastPoisonResult,
+      vultureResult: room.lastVultureResult,
       leaderboard: room.phase === 'leaderboard' ? leaderboardData(room) : null,
       endResult: room.endResult,
       characters: characterOptions(room),
@@ -181,8 +205,10 @@ function syncRoom(room) {
       bidReveal: room.phase === 'bid_reveal' || room.phase === 'target_select' || room.phase === 'effect_reveal'
         ? bidRevealPayload(room)
         : null,
+      fight: fightPublic(room),
       effectResult: room.lastEffectResult,
       poisonResult: room.lastPoisonResult,
+      vultureResult: room.lastVultureResult,
       leaderboard: room.phase === 'leaderboard' ? leaderboardData(room) : null,
       endResult: room.endResult,
       characters: characterOptions(room),
@@ -214,8 +240,12 @@ function eliminate(player) {
 function clearTimers(room) {
   if (room.bidTimer) clearTimeout(room.bidTimer);
   if (room.targetTimer) clearTimeout(room.targetTimer);
+  if (room.countdownTimer) clearTimeout(room.countdownTimer);
+  if (room.fightTimer) clearTimeout(room.fightTimer);
   room.bidTimer = null;
   room.targetTimer = null;
+  room.countdownTimer = null;
+  room.fightTimer = null;
 }
 
 function startRound(room) {
@@ -223,6 +253,7 @@ function startRound(room) {
   room.round += 1;
   room.lastEffectResult = null;
   room.lastPoisonResult = null;
+  room.lastVultureResult = null;
   room.winnerId = null;
   room.bids = new Map();
   room.passed = new Set();
@@ -235,6 +266,17 @@ function startRound(room) {
       room.lastPoisonResult = { targetId: target.id, targetName: target.name };
     }
     room.pendingPoison = null;
+  }
+
+  // Apply pending vulture mark: 30% of CURRENT Strength, computed now.
+  if (room.pendingVultureMark) {
+    const target = room.players.get(room.pendingVultureMark.targetId);
+    if (target && target.active) {
+      const amount = Math.floor(target.strength * 0.3);
+      target.strength = Math.max(0, target.strength - amount);
+      room.lastVultureResult = { targetId: target.id, targetName: target.name, amount };
+    }
+    room.pendingVultureMark = null;
   }
 
   room.currentItem = room.itemQueue[room.round - 1];
@@ -297,47 +339,7 @@ function resolveItemEffect(room, winner, item) {
     return;
   }
 
-  // attack items
-  if (item.power === 'ambush') {
-    const active = getActivePlayers(room);
-    let minStrength = Infinity;
-    for (const p of active) minStrength = Math.min(minStrength, p.strength);
-    // Winner can never be their own victim - if winner is the sole player at
-    // the board's lowest Strength, the ambush has no valid target and fizzles.
-    const candidates = active.filter((p) => p.strength === minStrength && p.id !== winner.id);
-    if (candidates.length === 0) {
-      room.lastEffectResult = { type: 'ambush', winnerId: winner.id, fizzled: true };
-      room.phase = 'effect_reveal';
-      syncRoom(room);
-      return;
-    }
-    const victim = candidates[Math.floor(Math.random() * candidates.length)];
-    eliminate(victim);
-    room.lastEffectResult = { type: 'ambush', winnerId: winner.id, eliminatedId: victim.id, tagline: pickTagline(room) };
-    room.phase = 'effect_reveal';
-    syncRoom(room);
-    return;
-  }
-
-  if (item.power === 'stampede') {
-    // Random OTHER active player is eliminated - never the bidder, and
-    // never chosen by the bidder.
-    const eligible = getActivePlayers(room).filter((p) => p.id !== winner.id);
-    if (eligible.length === 0) {
-      room.lastEffectResult = { type: 'stampede', winnerId: winner.id, fizzled: true };
-      room.phase = 'effect_reveal';
-      syncRoom(room);
-      return;
-    }
-    const victim = eligible[Math.floor(Math.random() * eligible.length)];
-    eliminate(victim);
-    room.lastEffectResult = { type: 'stampede', winnerId: winner.id, eliminatedId: victim.id, tagline: pickTagline(room) };
-    room.phase = 'effect_reveal';
-    syncRoom(room);
-    return;
-  }
-
-  // remaining attack items require the winner to pick target(s)
+  // all remaining attack items require the winner to deliberately pick target(s)
   const baseCount = item.power === 'tren' ? 2 : 1;
   const eligible = getActivePlayers(room).filter((p) => p.id !== winner.id);
 
@@ -384,6 +386,13 @@ function applyTargetedEffect(room, winner, item, targetIds) {
   clearTimers(room);
   const targets = targetIds.map((id) => room.players.get(id)).filter(Boolean);
 
+  // Elimination-attempt items no longer resolve instantly - they trigger a
+  // live interactive fight between attacker and defender.
+  if (item.fight) {
+    startFight(room, winner, targets[0], item);
+    return;
+  }
+
   if (item.power === 'sharpened_claw') {
     const target = targets[0];
     const amount = Math.floor(target.strength / 2);
@@ -394,11 +403,15 @@ function applyTargetedEffect(room, winner, item, targetIds) {
     const target = targets[0];
     room.pendingPoison = { targetId: target.id, targetName: target.name };
     room.lastEffectResult = { type: 'poisoned_carcass', winnerId: winner.id };
-  } else if (item.power === 'hyena_pack') {
+  } else if (item.power === 'vultures_mark') {
     const target = targets[0];
-    const success = target.strength < winner.strength;
-    if (success) eliminate(target);
-    room.lastEffectResult = { type: 'hyena_pack', winnerId: winner.id, targetId: target.id, success, tagline: success ? pickTagline(room) : undefined };
+    room.pendingVultureMark = { targetId: target.id, targetName: target.name };
+    room.lastEffectResult = { type: 'vultures_mark', winnerId: winner.id, targetId: target.id };
+  } else if (item.power === 'locked_horns') {
+    const target = targets[0];
+    const amount = Math.floor(target.strength * 0.2);
+    target.strength = Math.max(0, target.strength - amount);
+    room.lastEffectResult = { type: 'locked_horns', winnerId: winner.id, targetId: target.id, amount };
   } else if (item.power === 'thorn_bush') {
     const target = targets[0];
     target.strength = Math.max(0, target.strength - 10);
@@ -408,6 +421,73 @@ function applyTargetedEffect(room, winner, item, targetIds) {
     room.lastEffectResult = { type: 'tren', winnerId: winner.id, eliminatedIds: targets.map((t) => t.id), tagline: pickTagline(room) };
   }
 
+  room.phase = 'effect_reveal';
+  syncRoom(room);
+}
+
+function startFight(room, attacker, defender, item) {
+  room.phase = 'fight';
+  room.fight = {
+    itemId: item.id,
+    attackerId: attacker.id,
+    defenderId: defender.id,
+    stage: 'countdown',
+    taps: { [attacker.id]: 0, [defender.id]: 0 },
+    endsAt: null,
+  };
+  syncRoom(room);
+
+  room.countdownTimer = setTimeout(() => {
+    if (!room.fight) return;
+    room.fight.stage = 'active';
+    room.fight.endsAt = Date.now() + FIGHT_DURATION_MS;
+    syncRoom(room);
+    room.fightTimer = setTimeout(() => resolveFight(room), FIGHT_DURATION_MS);
+  }, FIGHT_COUNTDOWN_MS);
+}
+
+function resolveFight(room) {
+  if (!room.fight) return;
+  clearTimers(room);
+  const { attackerId, defenderId, taps } = room.fight;
+  const attacker = room.players.get(attackerId);
+  const defender = room.players.get(defenderId);
+  const item = ITEMS[room.fight.itemId];
+  const tA = taps[attackerId] || 0;
+  const tB = taps[defenderId] || 0;
+
+  let attackerWins;
+  // A disconnected or fully unresponsive (0-tap) fighter forfeits the tap
+  // contest entirely - resolve purely by Strength instead.
+  if (tA === 0 || tB === 0 || !attacker.connected || !defender.connected) {
+    attackerWins = attacker.strength !== defender.strength
+      ? attacker.strength > defender.strength
+      : Math.random() < 0.5;
+  } else {
+    const bonusA = Math.max(0, Math.floor((attacker.strength - defender.strength) / 10));
+    const bonusB = Math.max(0, Math.floor((defender.strength - attacker.strength) / 10));
+    const scoreA = tA + bonusA;
+    const scoreB = tB + bonusB;
+    if (scoreA !== scoreB) attackerWins = scoreA > scoreB;
+    else if (attacker.strength !== defender.strength) attackerWins = attacker.strength > defender.strength;
+    else attackerWins = Math.random() < 0.5;
+  }
+
+  room.fight = null;
+
+  if (attackerWins) {
+    eliminate(defender);
+    room.lastEffectResult = {
+      type: 'fight_win', itemId: item.id, winnerId: attacker.id, eliminatedId: defender.id,
+      attackerTaps: tA, defenderTaps: tB, tagline: pickTagline(room),
+    };
+  } else {
+    attacker.strength = Math.max(0, attacker.strength - FIGHT_LOSS_PENALTY);
+    room.lastEffectResult = {
+      type: 'fight_loss', itemId: item.id, winnerId: attacker.id, defenderId: defender.id,
+      attackerTaps: tA, defenderTaps: tB, penalty: FIGHT_LOSS_PENALTY,
+    };
+  }
   room.phase = 'effect_reveal';
   syncRoom(room);
 }
@@ -585,6 +665,16 @@ io.on('connection', (socket) => {
     applyTargetedEffect(room, winner, item, validIds);
   });
 
+  socket.on('player:fight-tap', () => {
+    const room = rooms.get(socket.data.roomCode);
+    if (!room || room.phase !== 'fight' || !room.fight || room.fight.stage !== 'active') return;
+    const playerId = socket.data.playerId;
+    if (playerId !== room.fight.attackerId && playerId !== room.fight.defenderId) return;
+    if (Date.now() >= room.fight.endsAt) return;
+    room.fight.taps[playerId] = (room.fight.taps[playerId] || 0) + 1;
+    syncRoom(room);
+  });
+
   socket.on('disconnect', () => {
     const room = rooms.get(socket.data.roomCode);
     if (!room) return;
@@ -595,6 +685,11 @@ io.on('connection', (socket) => {
       if (player && player.socketId === socket.id) {
         player.connected = false;
         player.socketId = null;
+        if (room.phase === 'fight' && room.fight
+          && (player.id === room.fight.attackerId || player.id === room.fight.defenderId)) {
+          resolveFight(room);
+          return;
+        }
       }
     }
     syncRoom(room);
@@ -610,5 +705,5 @@ server.listen(PORT, () => {
 module.exports = {
   rooms, makeRoom, getActivePlayers, eliminate,
   startRound, revealBids, resolveItemEffect, applyTargetedEffect,
-  continueFromLeaderboard, endGame,
+  continueFromLeaderboard, endGame, startFight, resolveFight,
 };

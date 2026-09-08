@@ -13,6 +13,8 @@ let pendingTargetPrompt = null;
 let selectedTargets = [];
 let lastBiddingItemId = null;
 let lastEffectKey = null;
+let fightTapInterval = null;
+let lastFightStage = null;
 
 function charAvatarEl(characterId, size, extraClass = '', full = false) {
   const div = document.createElement('div');
@@ -138,7 +140,7 @@ function renderGame(state) {
   el('spectatorBanner').classList.toggle('hidden', me.active);
   el('roundInfo').textContent = `Round ${state.round} / ${state.totalRounds}`;
 
-  ['biddingView', 'targetSelectView', 'revealEffectView', 'leaderboardView'].forEach((v) => el(v).classList.add('hidden'));
+  ['biddingView', 'targetSelectView', 'fightView', 'revealEffectView', 'leaderboardView'].forEach((v) => el(v).classList.add('hidden'));
 
   if (state.phase === 'bidding') {
     if (lastBiddingItemId !== (state.currentItem && state.currentItem.id) + state.round) {
@@ -181,6 +183,12 @@ function renderGame(state) {
   if (state.phase === 'target_select' && pendingTargetPrompt && me.active) {
     el('targetSelectView').classList.remove('hidden');
     renderTargetSelect(state);
+    return;
+  }
+
+  if (state.phase === 'fight' && state.fight) {
+    el('fightView').classList.remove('hidden');
+    renderFight(state);
     return;
   }
 
@@ -261,6 +269,71 @@ el('passBtn').addEventListener('click', () => {
 function playerName(state, id) {
   const p = state.players.find((pp) => pp.id === id);
   return p ? p.name : '???';
+}
+
+function renderFight(state) {
+  const f = state.fight;
+  const content = el('fightContent');
+  const me = state.me;
+  const iAmAttacker = me.id === f.attacker.id;
+  const iAmDefender = me.id === f.defender.id;
+  const amParticipant = iAmAttacker || iAmDefender;
+  const opponent = iAmAttacker ? f.defender : f.attacker;
+  const self = iAmAttacker ? f.attacker : f.defender;
+
+  if (f.stage !== lastFightStage) {
+    lastFightStage = f.stage;
+    content.innerHTML = '';
+  }
+
+  if (f.stage === 'countdown') {
+    content.innerHTML = `
+      <div style="text-align:center;">
+        <h2>${f.attacker.name} vs ${f.defender.name}</h2>
+        <div style="font-size:3.5rem; font-weight:900; color:var(--red); margin:1rem 0;">Get Ready!</div>
+        <p>${amParticipant ? 'Tap as fast as you can when it starts!' : 'Watch the host screen...'}</p>
+      </div>`;
+    return;
+  }
+
+  if (f.stage === 'active') {
+    if (!amParticipant) {
+      const tapsA = f.taps[f.attacker.id] || 0;
+      const tapsB = f.taps[f.defender.id] || 0;
+      content.innerHTML = `
+        <div style="text-align:center;">
+          <h2>${f.attacker.name} vs ${f.defender.name}</h2>
+          <p style="font-size:1.3rem; font-weight:800;">${tapsA} — ${tapsB}</p>
+          <p>Fighting it out... watch the host screen!</p>
+        </div>`;
+      return;
+    }
+    // Only build the tap UI once per fight to avoid wiping button state; update live parts after.
+    if (!document.getElementById('fightTapBtn')) {
+      content.innerHTML = `
+        <div style="text-align:center;">
+          <h2 style="margin-bottom:0.2rem;">VS ${opponent.name}</h2>
+          <p id="fightTimeLeft" style="font-weight:800; font-size:1.1rem;"></p>
+          <button id="fightTapBtn" style="width:100%; padding:2.2rem; font-size:2rem; font-weight:900; background:var(--red); color:#fff; border-radius:20px; margin:1rem 0; box-shadow:0 6px 0 #8a2a20;">TAP!</button>
+          <p id="fightTapCount" style="font-size:1.3rem; font-weight:800;"></p>
+        </div>`;
+      const btn = document.getElementById('fightTapBtn');
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); socket.emit('player:fight-tap'); btn.style.transform = 'scale(0.94)'; setTimeout(() => { btn.style.transform = 'scale(1)'; }, 60); }, { passive: false });
+      btn.addEventListener('click', () => { socket.emit('player:fight-tap'); });
+      if (fightTapInterval) clearInterval(fightTapInterval);
+      fightTapInterval = setInterval(() => {
+        const node = document.getElementById('fightTimeLeft');
+        if (!node || !latestState || !latestState.fight || latestState.fight.stage !== 'active') { clearInterval(fightTapInterval); fightTapInterval = null; return; }
+        const rem = Math.max(0, (latestState.fight.endsAt - Date.now()) / 1000);
+        node.textContent = `${rem.toFixed(1)}s left`;
+      }, 100);
+    }
+    const myTaps = f.taps[self.id] || 0;
+    const oppTaps = f.taps[opponent.id] || 0;
+    const countEl = document.getElementById('fightTapCount');
+    if (countEl) countEl.textContent = `You: ${myTaps}  •  ${opponent.name}: ${oppTaps}`;
+    return;
+  }
 }
 
 function renderRevealEffect(state) {

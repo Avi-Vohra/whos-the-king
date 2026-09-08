@@ -150,6 +150,7 @@ function renderGame(state) {
       el('submitBidBtn').disabled = false;
       el('passBtn').disabled = false;
     }
+    el('bidInput').max = me.roars;
     el('biddingView').classList.remove('hidden');
     el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
     el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';

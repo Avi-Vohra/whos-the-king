@@ -403,7 +403,7 @@ function buildBald() {
 }
 
 function buildCute() {
-  const s = 0.62; // chibi: tiny body relative to head
+  const s = 0.78; // chibi: smaller body relative to the oversized head
   const g = furGrad('#ffe3ba', '#f2bd7c');
   const mane = maneRing(HEAD_CX, HEAD_CY, 30, 6.4, 10, ['#ffe9c4']);
   const shoulderY = HEAD_CY + 40;

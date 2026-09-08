@@ -18,3 +18,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v4** — Self-audit: verified full games at 2/3/4/6/8 players (all pass, no self-targeting, correct Tren/Baboon frequency). Graphics pass: rebuilt Bald Lion's torso/arms (was a flat blob, now has visible crossed-arm pose and shading).
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `b2f04e8`
+
+- **v5** — Background overhaul: replaced flat gradient with layered savanna scene (2 hill layers, 5 acacia tree silhouettes, jagged grass texture) as a fixed bottom band behind all screens. Verified on both host and player (narrow phone width).
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `8488085`

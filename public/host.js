@@ -144,11 +144,35 @@ function renderGame(state) {
   }
 }
 
+let lastLionessRound = null;
+
+function renderLionessCinematic(state) {
+  const stage = el('lionessStage');
+  const isNewReveal = lastLionessRound !== state.round;
+  lastLionessRound = state.round;
+  stage.innerHTML = `
+    <div class="lioness-rays"></div>
+    <div class="lioness-grass"></div>
+    <div class="lioness-sparkles">${'<span></span>'.repeat(10)}</div>
+    <div class="lioness-portrait ${isNewReveal ? 'lioness-entrance' : ''}">${characterSVG('lioness_hero', 210, { full: true })}</div>
+    <div class="lioness-caption">👑 The Most Coveted Prize on the Savanna 👑</div>`;
+}
+
 function renderBidding(state) {
-  el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
   el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';
-  el('itemIcon').innerHTML = state.currentItem ? itemIconSVG(state.currentItem.id, 96) : '';
   el('itemCard').classList.toggle('tren-glow', !!state.currentItem && state.currentItem.id === 'tren');
+
+  const isLioness = !!state.currentItem && state.currentItem.id === 'loyal_lioness';
+  el('itemCard').classList.toggle('lioness-mode', isLioness);
+  el('itemIcon').classList.toggle('hidden', isLioness);
+  el('lionessStage').classList.toggle('hidden', !isLioness);
+  if (isLioness) {
+    el('itemName').textContent = 'A Loyal Lioness';
+    renderLionessCinematic(state);
+  } else {
+    el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
+    el('itemIcon').innerHTML = state.currentItem ? itemIconSVG(state.currentItem.id, 96) : '';
+  }
 
   const grid = el('bidProgressGrid');
   grid.innerHTML = '';
@@ -404,6 +428,22 @@ function renderEffect(state) {
     const h = document.createElement('h2');
     h.textContent = `${winner.name} won the item, but there was no valid target left.`;
     stage.appendChild(h);
+  } else if (result.type === 'strength' && result.itemId === 'loyal_lioness') {
+    stage.classList.add('lioness-claim-stage');
+    const row = document.createElement('div');
+    row.className = 'lioness-claim-row' + (isNew ? ' lioness-claim-anim' : '');
+    const heroWrap = document.createElement('div');
+    heroWrap.innerHTML = characterSVG('lioness_hero', 170, { full: true });
+    row.appendChild(heroWrap);
+    row.appendChild(charAvatar(winner.character, 170, '', true));
+    stage.appendChild(row);
+    const h = document.createElement('h2');
+    h.textContent = `${winner.name} wins her loyalty!`;
+    stage.appendChild(h);
+    const pop = document.createElement('div');
+    pop.className = 'stat-pop gain';
+    pop.textContent = `+${result.amount} Strength`;
+    stage.appendChild(pop);
   } else if (result.type === 'strength') {
     stage.appendChild(charAvatar(winner.character, 160, isNew ? 'pop' : '', true));
     const h = document.createElement('h2');

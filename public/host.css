@@ -398,3 +398,104 @@ body {
 .mourners-caption { font-style: italic; font-weight: 700; color: var(--brown); margin-bottom: 0.4rem; }
 .mourners-avatars { display: flex; justify-content: center; gap: 0.5rem; }
 .mourners-avatars .char-avatar { width: 56px; height: 56px; opacity: 0.85; filter: saturate(0.7); }
+
+/* ---------- The Lioness: cinematic reveal + idle ---------- */
+.item-card.lioness-mode {
+  background: radial-gradient(ellipse at 50% 30%, #fff3c8 0%, #ffd98a 45%, #e8a33d 100%);
+  overflow: hidden;
+}
+.lioness-stage {
+  position: relative;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.lioness-rays {
+  position: absolute;
+  inset: -20% -60%;
+  background: repeating-conic-gradient(from 0deg at 50% 30%,
+    rgba(255,246,200,0.55) 0deg 6deg, rgba(255,246,200,0) 6deg 18deg);
+  animation: lioness-ray-spin 18s linear infinite;
+  opacity: 0.8;
+}
+@keyframes lioness-ray-spin { to { transform: rotate(360deg); } }
+.lioness-grass {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 46px;
+  background: repeating-linear-gradient(75deg, #4a8f3c 0 6px, #5da84c 6px 12px);
+  clip-path: polygon(0% 100%, 3% 20%, 6% 100%, 9% 30%, 12% 100%, 15% 15%, 18% 100%, 21% 35%, 24% 100%,
+    27% 20%, 30% 100%, 33% 30%, 36% 100%, 39% 15%, 42% 100%, 45% 35%, 48% 100%, 51% 20%, 54% 100%,
+    57% 30%, 60% 100%, 63% 15%, 66% 100%, 69% 35%, 72% 100%, 75% 20%, 78% 100%, 81% 30%, 84% 100%,
+    87% 15%, 90% 100%, 93% 35%, 96% 100%, 100% 20%, 100% 100%);
+  animation: lioness-grass-sway 3.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes lioness-grass-sway { 0%,100% { transform: skewX(-3deg); } 50% { transform: skewX(3deg); } }
+.lioness-sparkles { position: absolute; inset: 0; pointer-events: none; }
+.lioness-sparkles span {
+  position: absolute;
+  width: 6px; height: 6px;
+  background: #fff6c0;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px #fff6c0;
+  animation: sparkle-twinkle 2.4s ease-in-out infinite;
+}
+.lioness-sparkles span:nth-child(1) { top: 15%; left: 12%; animation-delay: 0s; }
+.lioness-sparkles span:nth-child(2) { top: 25%; left: 82%; animation-delay: 0.3s; }
+.lioness-sparkles span:nth-child(3) { top: 10%; left: 48%; animation-delay: 0.6s; }
+.lioness-sparkles span:nth-child(4) { top: 40%; left: 20%; animation-delay: 0.9s; }
+.lioness-sparkles span:nth-child(5) { top: 35%; left: 70%; animation-delay: 1.2s; }
+.lioness-sparkles span:nth-child(6) { top: 55%; left: 88%; animation-delay: 1.5s; }
+.lioness-sparkles span:nth-child(7) { top: 60%; left: 8%; animation-delay: 1.8s; }
+.lioness-sparkles span:nth-child(8) { top: 8%; left: 68%; animation-delay: 2.1s; }
+.lioness-sparkles span:nth-child(9) { top: 45%; left: 45%; animation-delay: 0.45s; }
+.lioness-sparkles span:nth-child(10) { top: 20%; left: 30%; animation-delay: 1.05s; }
+@keyframes sparkle-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.lioness-portrait {
+  position: relative;
+  z-index: 2;
+  animation: lioness-idle-sway 4s ease-in-out infinite;
+}
+@keyframes lioness-idle-sway {
+  0%, 100% { transform: rotate(-1.2deg) translateY(0); }
+  50% { transform: rotate(1.2deg) translateY(-4px); }
+}
+.lioness-portrait.lioness-entrance {
+  animation: lioness-entrance-anim 1.6s cubic-bezier(.2,.8,.3,1) forwards, lioness-idle-sway 4s ease-in-out 1.6s infinite;
+}
+@keyframes lioness-entrance-anim {
+  0% { transform: scale(0.55) translateY(50px); opacity: 0; filter: brightness(2) blur(4px); }
+  60% { opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: brightness(1) blur(0); }
+}
+.lioness-claim-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.lioness-claim-row.lioness-claim-anim > div:first-child {
+  animation: claim-lioness-in 0.7s ease forwards;
+}
+.lioness-claim-row.lioness-claim-anim > div:last-child {
+  animation: claim-winner-in 0.7s ease 0.15s both;
+}
+@keyframes claim-lioness-in { 0% { transform: translateX(40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+@keyframes claim-winner-in { 0% { transform: translateX(-40px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+.lioness-caption {
+  position: relative;
+  z-index: 2;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--brown-dark);
+  text-shadow: 0 2px 0 rgba(255,255,255,0.4);
+  padding: 0.4rem 0 0.6rem;
+}

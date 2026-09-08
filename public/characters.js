@@ -481,12 +481,83 @@ function buildLady() {
     + face;
 }
 
+// ---- The Lioness: dedicated hero asset for the "A Loyal Lioness" item ----
+// Highest-detail character in the game - individually shaded flowing mane
+// strands, bigger expressive eyes with a strong catchlight, warm
+// golden-hour palette. Not part of the playable roster.
+function buildLionessHero() {
+  const skin = furGrad('#f4c988', '#d99f56', '38%', '22%');
+  const strandGradA = sheenGrad('#c9873f', '#8f5a24');
+  const strandGradB = sheenGrad('#e8b563', '#a8703c');
+  const dressGrad = sheenGrad('#e8a63f', '#b8721f');
+
+  // Long flowing mane built from many individual overlapping strand paths
+  // radiating from the head (measured from straight-up, sweeping to each
+  // side but staying clear of the face oval - only the top/side ~220deg
+  // arc gets strands, never the bottom ~140deg where eyes/nose/mouth are).
+  let mane = '';
+  const strandCount = 14;
+  const maneCx = HEAD_CX, maneCy = HEAD_CY - 6;
+  for (let i = 0; i < strandCount; i++) {
+    const deg = -110 + (i / (strandCount - 1)) * 220;
+    const rad = (deg * Math.PI) / 180;
+    const dirX = Math.sin(rad);
+    const dirY = -Math.cos(rad);
+    const len = 44 + (i % 3) * 9;
+    const baseR = 25;
+    const baseX = maneCx + dirX * baseR;
+    const baseY = maneCy + dirY * baseR;
+    const tipX = maneCx + dirX * len;
+    const tipY = maneCy + dirY * len + 12;
+    const midX = maneCx + dirX * (len * 0.58);
+    const midY = maneCy + dirY * (len * 0.58) + 3;
+    const grad = i % 2 === 0 ? strandGradA : strandGradB;
+    mane += `<path d="M ${baseX.toFixed(1)} ${baseY.toFixed(1)} Q ${midX.toFixed(1)} ${midY.toFixed(1)} ${tipX.toFixed(1)} ${tipY.toFixed(1)}"
+      stroke="url(#${grad.id})" stroke-width="${(9 - (i % 3)).toFixed(1)}" fill="none" stroke-linecap="round" opacity="0.94"/>`;
+  }
+  const maneBase = `<ellipse cx="${maneCx}" cy="${maneCy}" rx="30" ry="28" fill="url(#${strandGradB.id})"/>`;
+
+  const dress = `<path d="M 58 108 Q 80 100 102 108
+      Q 96 120 94 128 Q 108 138 114 152
+      Q 80 170 46 152 Q 52 138 66 128 Q 64 120 58 108 Z" fill="url(#${dressGrad.id})"/>
+    <path d="M 58 108 Q 80 100 102 108 L 98 118 Q 80 112 62 118 Z" fill="#f4c988" opacity="0.5"/>
+    <path d="M 94 128 Q 80 133 66 128" stroke="#8a5a1f" stroke-width="1.6" fill="none" opacity="0.6"/>`;
+  const legs = `<path d="M 68 152 L 66 200" stroke="#d99f56" stroke-width="9" stroke-linecap="round"/>
+    <path d="M 92 152 L 94 200" stroke="#d99f56" stroke-width="9" stroke-linecap="round"/>
+    <ellipse cx="66" cy="202" rx="7" ry="4" fill="#d99f56"/><ellipse cx="94" cy="202" rx="7" ry="4" fill="#d99f56"/>`;
+  // Dramatic pose: one arm raised gracefully to her mane, one on hip.
+  const arms = `<path d="M 58 112 Q 40 108 36 92" stroke="#f4c988" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <circle cx="36" cy="92" r="6.5" fill="#d99f56"/>
+    <path d="M 102 114 Q 114 128 106 146" stroke="#f4c988" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <circle cx="106" cy="146" r="6.5" fill="#d99f56"/>`;
+
+  const eyes = oneSultryEye(HEAD_CX - 12, HEAD_CY - 2, -1, '#4a2f16')
+    + oneSultryEye(HEAD_CX + 12, HEAD_CY - 2, 1, '#4a2f16')
+    + `<circle cx="${HEAD_CX - 14}" cy="${HEAD_CY - 4}" r="1.6" fill="#fff" opacity="0.95"/>
+       <circle cx="${HEAD_CX + 10}" cy="${HEAD_CY - 4}" r="1.6" fill="#fff" opacity="0.95"/>`;
+
+  const face = `<circle cx="${HEAD_CX - 30}" cy="${HEAD_CY - 30}" r="4" fill="#fff" opacity="0.75"/>
+      <circle cx="${HEAD_CX + 16}" cy="${HEAD_CY + 10}" r="3.4" fill="#ffb0c8" opacity="0.5"/>
+      <circle cx="${HEAD_CX - 18}" cy="${HEAD_CY + 10}" r="3.4" fill="#ffb0c8" opacity="0.5"/>
+      <circle cx="${HEAD_CX + 14}" cy="${HEAD_CY + 18}" r="1.3" fill="#7a3a2a"/>`
+    + BROW.arched(HEAD_CX, HEAD_CY - 5, '#6b4527')
+    + eyes + nose(HEAD_CX, HEAD_CY + 10, '#a85a6a')
+    + MOUTH.lips(HEAD_CX, HEAD_CY + 16, '#c0203f');
+
+  return `<defs>${skin.defs}${strandGradA.defs}${strandGradB.defs}${dressGrad.defs}</defs>`
+    + tail(105, 150, '#d99f56', '#f4c988', 1)
+    + legs + dress + arms + maneBase + mane
+    + headBase(`url(#${skin.id})`, HEAD_CX, HEAD_CY, 27, '#e0b06a', '#d99f56', '#fff2d9')
+    + face;
+}
+
 const BUILDERS = {
   chopped: buildChopped,
   chud: buildChud,
   'chud-jr': buildChudJr,
   zesty: buildZesty,
   diva: buildDiva,
+  lioness_hero: buildLionessHero,
   tiny: buildTiny,
   bald: buildBald,
   cute: buildCute,

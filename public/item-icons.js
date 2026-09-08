@@ -136,15 +136,21 @@ const ITEM_BUILDERS = {
     return badge('#d7e8bf', '#8bb56a', inner);
   },
   hyena_pack() {
-    const inner = `
-      <g fill="#a9925f">
-        <path d="M 20 78 L 30 44 L 42 78 Z"/>
-        <path d="M 40 82 L 50 38 L 62 82 Z"/>
-        <path d="M 60 78 L 70 46 L 80 78 Z"/>
-      </g>
-      <g fill="#3a2712">
-        <circle cx="30" cy="58" r="2"/><circle cx="50" cy="52" r="2.2"/><circle cx="70" cy="58" r="2"/>
+    function hyenaHead(cx, cy, scale, flip) {
+      const f = flip ? -1 : 1;
+      return `<g transform="translate(${cx} ${cy}) scale(${f * scale} ${scale})">
+        <path d="M -14 8 Q -16 -6 -6 -12 L -8 -20 L -1 -13 Q 6 -14 12 -6 Q 16 2 10 10 Q 12 16 6 18
+          Q 8 22 2 22 Q -2 26 -8 20 Q -16 20 -14 8 Z" fill="#8a6f45"/>
+        <path d="M 4 10 Q 10 13 13 9" fill="none" stroke="#2a1c0d" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="1" cy="-2" r="1.6" fill="#c0392b"/>
+        <path d="M -2 12 L 8 12 L 5 17 L 1 17 Z" fill="#fdf6e3"/>
       </g>`;
+    }
+    const inner = `
+      <ellipse cx="50" cy="80" rx="38" ry="8" fill="#3a2f1f" opacity="0.35"/>
+      ${hyenaHead(28, 60, 1.15, true)}
+      ${hyenaHead(52, 48, 1.4, false)}
+      ${hyenaHead(76, 62, 1.1, false)}`;
     return badge('#e8d8ae', '#b89b62', inner);
   },
   tren() {

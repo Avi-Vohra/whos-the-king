@@ -382,10 +382,11 @@ function buildBald() {
     <path d="M 62 132 Q 80 138 98 132" stroke="#00000018" stroke-width="2" fill="none"/>
     <path d="M 64 144 Q 80 150 96 144" stroke="#00000018" stroke-width="2" fill="none"/>`;
   const legs = standardLegs(80, 156, 205, 21, 20, '#c68a3f', '#a8712f');
-  // Arms crossed high on the chest - confident, dignified, clearly visible.
-  const arms = `<path d="M 50 110 Q 60 138 92 122" stroke="#c68a3f" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <path d="M 110 110 Q 100 138 68 122" stroke="#b8802f" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <circle cx="92" cy="122" r="8" fill="#a8712f"/><circle cx="68" cy="122" r="8" fill="#a8712f"/>`;
+  // Arms crossed high on the chest with elbows flared outward - confident,
+  // dignified, and wide enough to read as a real silhouette at small sizes.
+  const arms = `<path d="M 42 108 Q 24 128 42 146 Q 66 136 94 124" stroke="#c68a3f" stroke-width="15" fill="none" stroke-linecap="round"/>
+    <path d="M 118 108 Q 136 128 118 146 Q 94 136 66 124" stroke="#b8802f" stroke-width="15" fill="none" stroke-linecap="round"/>
+    <circle cx="94" cy="124" r="8.5" fill="#a8712f"/><circle cx="66" cy="124" r="8.5" fill="#a8712f"/>`;
   const necklace = `<path d="M 60 106 Q 80 120 100 106" stroke="#e0a83a" stroke-width="2.6" fill="none"/>
     <circle cx="80" cy="117" r="6" fill="#e0a83a" stroke="#a87a1e" stroke-width="1.3"/>
     <circle cx="80" cy="117" r="2.4" fill="#fff6de"/>`;

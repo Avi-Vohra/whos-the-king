@@ -30,3 +30,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v7** — Self-audit: full socket-driven games simulated at 2/3/4/6/8 players (no crashes, no self-targeting, Tren/Baboon exactly once each game, correct King/fallen endings). Tiny Terror rebuilt (was shrunk to 68% leaving him tiny/empty-looking vs the rest of the roster; now 88%, tapered torso, tail off the fist). Cute Lion's chibi body proportions nudged slightly larger.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `477eabf`
+
+- **v8** — UI polish: button hover/focus-visible states, subtle card top sheen. Fixed two confusing item icons: Hyena Pack looked identical to Prime Territory's hills (now a pack of red-eyed toothy hyena silhouettes); Thorn Bush Ambush's red circle+cross read as a medical symbol (now lurking predator eyes in the bush).
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `f755eb0`

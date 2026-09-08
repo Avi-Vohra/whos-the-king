@@ -9,7 +9,40 @@ const { ITEMS, generateItemQueue, TOTAL_ROUNDS } = require('./items');
 const nanoid = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 4);
 const genPlayerId = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 12);
 
-const STARTING_ROARS = 100;
+const STARTING_ROARS = 150;
+
+const ELIMINATION_TAGLINES = [
+  'Rest in pieces, mane and all.',
+  'The circle of life just got smaller.',
+  'Another one bites the dust and grass.',
+  'Pride Rock has no room for the weak.',
+  'Yeeted clean off the savanna.',
+  "That's gonna hurt the family tree.",
+  'Their role in this pride: recast.',
+  'The grass remembers everything.',
+  'Well, that escalated to extinction fast.',
+  "Filed under: should've bid more Roars.",
+  "Their Wi-Fi just disconnected. Permanently.",
+  'Voted off the savanna island.',
+  'The hyenas are already writing eulogies.',
+  'Gone with the wind and their dignity.',
+  "That's a wrap on their pride card.",
+  "Vultures circling. It's giving buffet.",
+  'Their spot in the group photo? Deleted.',
+  'Down bad and down for the count.',
+  'The savanna giveth, the savanna taketh.',
+  'Forgot sunscreen and survival instincts today.',
+];
+
+function pickTagline(room) {
+  if (!room.usedTaglines || room.usedTaglines.size >= ELIMINATION_TAGLINES.length) {
+    room.usedTaglines = new Set();
+  }
+  let idx;
+  do { idx = Math.floor(Math.random() * ELIMINATION_TAGLINES.length); } while (room.usedTaglines.has(idx));
+  room.usedTaglines.add(idx);
+  return ELIMINATION_TAGLINES[idx];
+}
 const BID_TIME_MS = 30000;
 const TARGET_SELECT_TIME_MS = 30000;
 const MIN_PLAYERS = 2;
@@ -17,7 +50,15 @@ const MIN_PLAYERS = 2;
 const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'public')));
+// Dev-friendly static serving: without explicit no-store, browsers will
+// heuristically cache these files (Last-Modified with no Cache-Control lets
+// Chrome skip re-requesting entirely for a while), so edits can silently not
+// show up on reload. Force revalidation every time.
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+}));
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -48,6 +89,7 @@ function makeRoom() {
     bidTimer: null,
     targetTimer: null,
     endResult: null,
+    usedTaglines: new Set(),
   };
   rooms.set(code, room);
   return room;
@@ -249,7 +291,7 @@ function resolveItemEffect(room, winner, item) {
 
   if (item.type === 'trap') {
     eliminate(winner);
-    room.lastEffectResult = { type: 'baboon', winnerId: winner.id };
+    room.lastEffectResult = { type: 'baboon', winnerId: winner.id, tagline: pickTagline(room) };
     room.phase = 'effect_reveal';
     syncRoom(room);
     return;
@@ -271,7 +313,25 @@ function resolveItemEffect(room, winner, item) {
     }
     const victim = candidates[Math.floor(Math.random() * candidates.length)];
     eliminate(victim);
-    room.lastEffectResult = { type: 'ambush', winnerId: winner.id, eliminatedId: victim.id };
+    room.lastEffectResult = { type: 'ambush', winnerId: winner.id, eliminatedId: victim.id, tagline: pickTagline(room) };
+    room.phase = 'effect_reveal';
+    syncRoom(room);
+    return;
+  }
+
+  if (item.power === 'stampede') {
+    // Random OTHER active player is eliminated - never the bidder, and
+    // never chosen by the bidder.
+    const eligible = getActivePlayers(room).filter((p) => p.id !== winner.id);
+    if (eligible.length === 0) {
+      room.lastEffectResult = { type: 'stampede', winnerId: winner.id, fizzled: true };
+      room.phase = 'effect_reveal';
+      syncRoom(room);
+      return;
+    }
+    const victim = eligible[Math.floor(Math.random() * eligible.length)];
+    eliminate(victim);
+    room.lastEffectResult = { type: 'stampede', winnerId: winner.id, eliminatedId: victim.id, tagline: pickTagline(room) };
     room.phase = 'effect_reveal';
     syncRoom(room);
     return;
@@ -338,10 +398,14 @@ function applyTargetedEffect(room, winner, item, targetIds) {
     const target = targets[0];
     const success = target.strength < winner.strength;
     if (success) eliminate(target);
-    room.lastEffectResult = { type: 'hyena_pack', winnerId: winner.id, targetId: target.id, success };
+    room.lastEffectResult = { type: 'hyena_pack', winnerId: winner.id, targetId: target.id, success, tagline: success ? pickTagline(room) : undefined };
+  } else if (item.power === 'thorn_bush') {
+    const target = targets[0];
+    target.strength = Math.max(0, target.strength - 10);
+    room.lastEffectResult = { type: 'thorn_bush', winnerId: winner.id, targetId: target.id, amount: 10 };
   } else if (item.power === 'tren') {
     for (const t of targets) eliminate(t);
-    room.lastEffectResult = { type: 'tren', winnerId: winner.id, eliminatedIds: targets.map((t) => t.id) };
+    room.lastEffectResult = { type: 'tren', winnerId: winner.id, eliminatedIds: targets.map((t) => t.id), tagline: pickTagline(room) };
   }
 
   room.phase = 'effect_reveal';

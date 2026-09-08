@@ -87,6 +87,13 @@ h1, h2, h3 { margin: 0 0 0.4rem 0; color: var(--brown-dark); }
   overflow: hidden;
 }
 
+.char-avatar.full-body {
+  border-radius: 18px;
+  height: auto !important;
+  aspect-ratio: 160 / 220;
+  background: linear-gradient(180deg, #fff8e8, #ffe2a8 70%);
+}
+
 .char-avatar.eliminated {
   filter: grayscale(1) brightness(0.7);
   opacity: 0.6;

@@ -172,11 +172,61 @@ body {
 .shake { animation: shake 0.5s ease; }
 
 .avatar-fade-out {
-  animation: fade-shrink 0.9s ease forwards;
+  animation: fall-fade 1s ease forwards;
 }
-@keyframes fade-shrink {
-  to { transform: scale(0.2) rotate(25deg); opacity: 0; }
+@keyframes fall-fade {
+  0% { filter: grayscale(0); transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { filter: grayscale(1) brightness(0.55); transform: translateY(22px) rotate(7deg); opacity: 0.18; }
 }
+
+.elim-tagline {
+  font-style: italic;
+  font-weight: 700;
+  color: var(--brown);
+  margin-top: 0.2rem;
+}
+
+/* Tren: bigger text + pulsing green glow */
+.tren-glow {
+  box-shadow: 0 0 34px 10px rgba(58, 214, 106, 0.5);
+  animation: tren-pulse 1.5s ease-in-out infinite;
+}
+@keyframes tren-pulse {
+  0%, 100% { box-shadow: 0 0 26px 6px rgba(58, 214, 106, 0.4); }
+  50% { box-shadow: 0 0 54px 18px rgba(58, 214, 106, 0.8); }
+}
+.tren-glow h2 { font-size: 3.1rem !important; color: #1a7a3a; text-shadow: 0 0 12px rgba(58,214,106,0.6); }
+
+.baboon-reveal {
+  animation: baboon-pop 0.4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes baboon-pop {
+  0% { transform: scale(0.4) translateY(10px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Baboon shotgun sequence */
+.shotgun-wrap {
+  position: absolute;
+  opacity: 0;
+  animation: shotgun-in 0.35s ease 0.35s forwards;
+}
+@keyframes shotgun-in {
+  0% { transform: translateX(60px) rotate(-25deg) scale(0.6); opacity: 0; }
+  100% { transform: translateX(0) rotate(-8deg) scale(1); opacity: 1; }
+}
+.muzzle-flash {
+  position: absolute;
+  width: 46px; height: 46px;
+  opacity: 0;
+  animation: flash-pop 0.3s ease 0.68s forwards;
+}
+@keyframes flash-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  40% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
+.blam-text { animation-delay: 0.68s; }
 
 .leaderboard-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .lb-row {
@@ -210,7 +260,17 @@ body {
 }
 .crown-screen .big-avatar { width: 220px; height: 220px; margin: 0 auto; }
 .crown-screen h1 { font-size: 3.5rem; color: var(--cream); text-shadow: 0 4px 0 var(--brown-dark); }
-.crown-emoji { font-size: 4rem; animation: bounce-crown 1s ease infinite; }
+.crown-emoji {
+  font-size: 4rem;
+  animation: crown-drop 0.7s cubic-bezier(.34,1.56,.64,1) forwards,
+    bounce-crown 1s ease 0.7s infinite;
+}
+@keyframes crown-drop {
+  0% { transform: translateY(-140px) scale(0.7); opacity: 0; }
+  60% { transform: translateY(8px) scale(1.08); opacity: 1; }
+  80% { transform: translateY(-6px) scale(0.97); }
+  100% { transform: translateY(0) scale(1); }
+}
 @keyframes bounce-crown { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 
 .fallen-screen { text-align: center; padding: 4rem 1rem; color: var(--cream); }

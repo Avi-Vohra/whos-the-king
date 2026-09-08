@@ -61,6 +61,15 @@ body {
 .me-header .name { font-weight: 900; font-size: 1.2rem; }
 
 .item-card { text-align: center; padding: 1.2rem; margin-bottom: 0.8rem; }
+.item-card.tren-glow {
+  box-shadow: 0 0 30px 8px rgba(58, 214, 106, 0.55);
+  animation: tren-pulse-card 1.5s ease-in-out infinite;
+}
+@keyframes tren-pulse-card {
+  0%, 100% { box-shadow: 0 0 22px 5px rgba(58, 214, 106, 0.4); }
+  50% { box-shadow: 0 0 44px 14px rgba(58, 214, 106, 0.75); }
+}
+.item-card.tren-glow h2 { font-size: 1.9rem; color: #1a7a3a; }
 .item-icon-wrap { margin: 0 auto 0.3rem; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.18)); }
 .item-card h2 { font-size: 1.5rem; }
 .item-card p { font-size: 1rem; color: var(--brown); }
@@ -105,6 +114,17 @@ body {
 .result-banner { text-align: center; padding: 1rem; font-weight: 800; font-size: 1.1rem; }
 .result-banner.good { color: var(--green); }
 .result-banner.bad { color: var(--red); }
+.result-banner.tren {
+  font-size: 1.5rem;
+  color: #1a7a3a;
+  text-shadow: 0 0 10px rgba(58,214,106,0.6);
+  animation: tren-pulse-p 1.5s ease-in-out infinite;
+}
+@keyframes tren-pulse-p {
+  0%, 100% { text-shadow: 0 0 8px rgba(58,214,106,0.5); }
+  50% { text-shadow: 0 0 18px rgba(58,214,106,0.9); }
+}
+.elim-tagline-p { text-align: center; font-style: italic; font-weight: 700; color: var(--brown); margin-top: -0.4rem; }
 
 .end-card { text-align: center; padding: 2rem 1rem; }
 .end-card .char-avatar { width: 160px; height: 160px; margin: 0 auto 1rem; }

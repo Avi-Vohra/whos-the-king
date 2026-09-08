@@ -138,15 +138,76 @@ const ITEM_BUILDERS = {
     return badge('#ffe2a8', '#e8752c', inner);
   },
   red_butt_baboon() {
+    return badge('#d8c3a3', '#8a7a6a', baboonCreatureMarkup(50, 58, 0.62));
+  },
+  great_migration() {
     const inner = `
-      <circle cx="50" cy="56" r="20" fill="#a9835a"/>
-      <circle cx="32" cy="42" r="8" fill="#8a6742"/><circle cx="68" cy="42" r="8" fill="#8a6742"/>
-      <ellipse cx="50" cy="64" rx="12" ry="9" fill="#e4c9a0"/>
-      <circle cx="43" cy="52" r="2.2" fill="#241305"/><circle cx="57" cy="52" r="2.2" fill="#241305"/>
-      <circle cx="76" cy="70" r="6" fill="#d64545"/>`;
-    return badge('#d8c3a3', '#a9835a', inner);
+      <path d="M 8 70 Q 30 46 50 62 Q 70 46 92 68 L 92 88 L 8 88 Z" fill="#6b8f3c"/>
+      <path d="M 8 78 Q 34 60 50 72 Q 68 58 92 76 L 92 88 L 8 88 Z" fill="#7fa84c"/>
+      <g fill="#8a6a3a">
+        <ellipse cx="34" cy="52" rx="9" ry="6"/><ellipse cx="34" cy="52" rx="9" ry="6" transform="translate(0,-8)"/>
+        <path d="M 30 46 L 27 36 M 38 46 L 41 36" stroke="#8a6a3a" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <g fill="#a9835a">
+        <ellipse cx="62" cy="46" rx="8" ry="5.5"/><ellipse cx="62" cy="46" rx="8" ry="5.5" transform="translate(0,-7)"/>
+        <path d="M 58 41 L 56 32 M 66 41 L 68 32" stroke="#a9835a" stroke-width="1.8" stroke-linecap="round"/>
+      </g>`;
+    return badge('#cfe6b0', '#8fb56a', inner);
+  },
+  thorn_bush_ambush() {
+    const inner = `
+      <ellipse cx="50" cy="66" rx="30" ry="16" fill="#4a6b2a"/>
+      <g stroke="#2f4a1a" stroke-width="2.4" stroke-linecap="round">
+        <path d="M 26 60 L 18 46"/><path d="M 34 52 L 30 36"/><path d="M 46 48 L 46 30"/>
+        <path d="M 58 48 L 62 30"/><path d="M 68 54 L 78 40"/><path d="M 74 62 L 86 52"/>
+      </g>
+      <circle cx="50" cy="64" r="12" fill="#d64545"/>
+      <path d="M 42 64 L 58 64 M 50 56 L 50 72" stroke="#a02525" stroke-width="1.6"/>`;
+    return badge('#d9e8c4', '#7a9a52', inner);
+  },
+  stampede() {
+    const inner = `
+      <g fill="#a9835a">
+        <path d="M 12 76 L 20 44 L 30 76 Z"/><path d="M 30 80 L 38 40 L 48 80 Z"/>
+        <path d="M 50 76 L 58 44 L 66 76 Z"/><path d="M 66 80 L 74 42 L 82 80 Z"/>
+      </g>
+      <g stroke="#5a3f1f" stroke-width="1.6" fill="none" opacity="0.6">
+        <path d="M 12 76 Q 20 60 20 44"/><path d="M 50 76 Q 58 60 58 44"/>
+      </g>
+      <circle cx="20" cy="50" r="1.8" fill="#241305"/><circle cx="38" cy="46" r="1.8" fill="#241305"/>
+      <circle cx="58" cy="50" r="1.8" fill="#241305"/><circle cx="74" cy="48" r="1.8" fill="#241305"/>`;
+    return badge('#e8d0a0', '#b8905a', inner);
   },
 };
+
+function baboonCreatureMarkup(cx, cy, scale) {
+  return `<g transform="translate(${cx} ${cy}) scale(${scale})">
+    <ellipse cx="10" cy="18" rx="9" ry="5" fill="#1c1c22" opacity="0.5"/>
+    <path d="M 30 -6 Q 35 -22 12 -22 L -34 -18 Q -46 -14 -46 0 Q -46 16 -30 18 L 22 16 Q 34 12 30 -6 Z" fill="#33333b"/>
+    <path d="M -46 0 Q -46 -12 -36 -16 L -30 -14 Q -40 -8 -38 4 Z" fill="#26262d" opacity="0.7"/>
+    <ellipse cx="22" cy="6" rx="11" ry="10" fill="#d64545"/>
+    <ellipse cx="22" cy="3" rx="8" ry="6.5" fill="#e8635a"/>
+    <path d="M 46 -6 Q 62 -14 66 -30 Q 58 -20 50 -14" fill="none" stroke="#26262d" stroke-width="5" stroke-linecap="round"/>
+    <g stroke="#26262d" stroke-width="7" stroke-linecap="round">
+      <path d="M -22 14 L -25 34"/><path d="M -10 15 L -13 34"/>
+      <path d="M 8 15 L 6 34"/><path d="M 18 13 L 17 32"/>
+    </g>
+    <g fill="#c9a67e">
+      <ellipse cx="-26" cy="35" rx="4.5" ry="2.6"/><ellipse cx="-14" cy="35" rx="4.5" ry="2.6"/>
+      <ellipse cx="5" cy="35" rx="4.5" ry="2.6"/><ellipse cx="16" cy="33" rx="4.5" ry="2.6"/>
+    </g>
+    <circle cx="-40" cy="-6" r="6" fill="#2c2c33"/>
+    <ellipse cx="-52" cy="1" rx="9" ry="7" fill="#8a95a8"/>
+    <path d="M -50 -3 Q -46 -1 -46 3" fill="none" stroke="#3a6fa8" stroke-width="3" stroke-linecap="round"/>
+    <path d="M -56 -3 Q -60 -1 -60 3" fill="none" stroke="#3a6fa8" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="-53" cy="5" rx="3.4" ry="2.4" fill="#d64545"/>
+    <circle cx="-42" cy="-9" r="1.6" fill="#0a0a0d"/>
+  </g>`;
+}
+
+function baboonStandaloneSVG(size = 160) {
+  return `<svg viewBox="0 0 140 100" width="${size}" height="${Math.round(size * 100 / 140)}" xmlns="http://www.w3.org/2000/svg">${baboonCreatureMarkup(78, 55, 1.35)}</svg>`;
+}
 
 function itemIconSVG(itemId, size = 90) {
   const build = ITEM_BUILDERS[itemId];

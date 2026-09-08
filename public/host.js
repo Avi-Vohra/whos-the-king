@@ -9,13 +9,13 @@ let latestState = null;
 let lastEffectKey = null;
 let lastPoisonKey = null;
 
-function charAvatar(characterId, size, extraClass = '') {
+function charAvatar(characterId, size, extraClass = '', full = false) {
   const div = document.createElement('div');
-  div.className = `char-avatar ${extraClass}`;
+  div.className = `char-avatar ${full ? 'full-body' : ''} ${extraClass}`;
   div.style.width = size + 'px';
   div.style.height = size + 'px';
   if (characterId) {
-    div.innerHTML = characterSVG(characterId, Math.round(size * 0.9));
+    div.innerHTML = characterSVG(characterId, Math.round(size * 0.9), { full });
   } else {
     div.innerHTML = '<span style="font-size:1.5rem;">?</span>';
   }
@@ -139,6 +139,7 @@ function renderBidding(state) {
   el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
   el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';
   el('itemIcon').innerHTML = state.currentItem ? itemIconSVG(state.currentItem.id, 96) : '';
+  el('itemCard').classList.toggle('tren-glow', !!state.currentItem && state.currentItem.id === 'tren');
 
   const grid = el('bidProgressGrid');
   grid.innerHTML = '';
@@ -162,12 +163,27 @@ function renderBidding(state) {
   }
 }
 
+let lastRevealKey = null;
+function animateCountUp(el, target, duration = 550) {
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = `${Math.round(target * eased)} 🔥`;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 function renderReveal(state) {
   const br = state.bidReveal;
   if (!br) return;
   el('revealItemName').textContent = br.item.name;
   const rows = el('revealRows');
   rows.innerHTML = '';
+  const revealKey = state.round + ':' + br.bids.map((b) => b.playerId + b.amount).join(',');
+  const isNewReveal = revealKey !== lastRevealKey;
+  lastRevealKey = revealKey;
   const sorted = br.bids.slice().sort((a, b) => b.amount - a.amount);
   for (const b of sorted) {
     const row = document.createElement('div');
@@ -181,7 +197,12 @@ function renderReveal(state) {
     row.appendChild(who);
     const amt = document.createElement('div');
     amt.className = 'amount';
-    amt.textContent = `${b.amount} 🔥`;
+    if (isNewReveal) {
+      amt.textContent = '0 🔥';
+      animateCountUp(amt, b.amount);
+    } else {
+      amt.textContent = `${b.amount} 🔥`;
+    }
     row.appendChild(amt);
     rows.appendChild(row);
   }
@@ -217,13 +238,22 @@ function renderEffect(state) {
     return p ? p.character : null;
   }
 
+  stage.classList.toggle('tren-glow', result.type === 'tren');
+
+  function taglineEl(tagline) {
+    const p = document.createElement('p');
+    p.className = 'elim-tagline';
+    p.textContent = tagline;
+    return p;
+  }
+
   if (result.fizzled) {
-    stage.appendChild(charAvatar(winner.character, 100));
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
     h.textContent = `${winner.name} won the item, but there was no valid target left.`;
     stage.appendChild(h);
   } else if (result.type === 'strength') {
-    stage.appendChild(charAvatar(winner.character, 130, isNew ? 'pop' : ''));
+    stage.appendChild(charAvatar(winner.character, 160, isNew ? 'pop' : '', true));
     const h = document.createElement('h2');
     h.textContent = `${winner.name} grows stronger!`;
     stage.appendChild(h);
@@ -232,7 +262,26 @@ function renderEffect(state) {
     pop.textContent = `+${result.amount} Strength`;
     stage.appendChild(pop);
   } else if (result.type === 'baboon') {
-    stage.appendChild(charAvatar(winner.character, 130, isNew ? 'shake' : ''));
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:flex-end; justify-content:center; gap:1rem; position:relative;';
+    row.appendChild(charAvatar(winner.character, 150, isNew ? 'shake' : '', true));
+    const baboonWrap = document.createElement('div');
+    baboonWrap.className = 'baboon-reveal';
+    baboonWrap.innerHTML = baboonStandaloneSVG(150);
+    row.appendChild(baboonWrap);
+    const shotgun = document.createElement('div');
+    shotgun.className = 'shotgun-wrap';
+    shotgun.style.right = '8%';
+    shotgun.style.bottom = '38%';
+    shotgun.innerHTML = shotgunSVG();
+    row.appendChild(shotgun);
+    const flash = document.createElement('div');
+    flash.className = 'muzzle-flash';
+    flash.style.left = '48%';
+    flash.style.bottom = '42%';
+    flash.innerHTML = muzzleFlashSVG();
+    row.appendChild(flash);
+    stage.appendChild(row);
     const h = document.createElement('h2');
     h.textContent = `${winner.name} got played...`;
     stage.appendChild(h);
@@ -245,24 +294,37 @@ function renderEffect(state) {
       smoke.className = 'smoke-cloud';
       smoke.style.left = `${40 + i * 8}%`;
       smoke.style.top = `${50 + (i % 2) * 10}%`;
-      smoke.style.animationDelay = `${i * 0.08}s`;
+      smoke.style.animationDelay = `${0.75 + i * 0.08}s`;
       stage.appendChild(smoke);
     }
     const sub = document.createElement('p');
-    sub.textContent = "🐒 The Red-Butt Baboon strikes again. Eliminated!";
+    sub.textContent = '🐒 The Red-Butt Baboon strikes again. Eliminated!';
     stage.appendChild(sub);
+    stage.appendChild(taglineEl(result.tagline));
   } else if (result.type === 'ambush') {
-    stage.appendChild(charAvatar(winner.character, 100));
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
     h.textContent = `${winner.name} sprung the ambush!`;
     stage.appendChild(h);
-    const vic = charAvatar(playerChar(result.eliminatedId), 90, 'avatar-fade-out');
+    const vic = charAvatar(playerChar(result.eliminatedId), 120, 'avatar-fade-out', true);
     stage.appendChild(vic);
     const sub = document.createElement('p');
     sub.textContent = `${playerName(result.eliminatedId)} (lowest Strength) is eliminated!`;
     stage.appendChild(sub);
+    stage.appendChild(taglineEl(result.tagline));
+  } else if (result.type === 'stampede') {
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
+    const h = document.createElement('h2');
+    h.textContent = `${winner.name} triggered a stampede!`;
+    stage.appendChild(h);
+    const vic = charAvatar(playerChar(result.eliminatedId), 120, 'avatar-fade-out', true);
+    stage.appendChild(vic);
+    const sub = document.createElement('p');
+    sub.textContent = `${playerName(result.eliminatedId)} never saw it coming. Eliminated!`;
+    stage.appendChild(sub);
+    stage.appendChild(taglineEl(result.tagline));
   } else if (result.type === 'sharpened_claw') {
-    stage.appendChild(charAvatar(winner.character, 100));
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
     h.textContent = `${winner.name} strikes ${playerName(result.targetId)}!`;
     stage.appendChild(h);
@@ -273,8 +335,20 @@ function renderEffect(state) {
     const sub = document.createElement('p');
     sub.textContent = `${playerName(result.targetId)} loses ${result.amount} Strength.`;
     stage.appendChild(sub);
+  } else if (result.type === 'thorn_bush') {
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
+    const h = document.createElement('h2');
+    h.textContent = `${winner.name} sends ${playerName(result.targetId)} into the thorns!`;
+    stage.appendChild(h);
+    const pop = document.createElement('div');
+    pop.className = 'stat-pop loss';
+    pop.textContent = `-${result.amount} Strength`;
+    stage.appendChild(pop);
+    const sub = document.createElement('p');
+    sub.textContent = `${playerName(result.targetId)} is hurt, but still standing.`;
+    stage.appendChild(sub);
   } else if (result.type === 'poisoned_carcass') {
-    stage.appendChild(charAvatar(winner.character, 110));
+    stage.appendChild(charAvatar(winner.character, 150, '', true));
     const h = document.createElement('h2');
     h.textContent = `${winner.name} plants a poisoned carcass...`;
     stage.appendChild(h);
@@ -282,17 +356,18 @@ function renderEffect(state) {
     sub.textContent = 'Somewhere out there, a rival will regret this. No one knows who yet...';
     stage.appendChild(sub);
   } else if (result.type === 'hyena_pack') {
-    stage.appendChild(charAvatar(winner.character, 100));
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
     h.textContent = result.success
       ? `The hyenas take down ${playerName(result.targetId)}!`
       : `The hyenas backed off...`;
     stage.appendChild(h);
     if (result.success) {
-      stage.appendChild(charAvatar(playerChar(result.targetId), 90, 'avatar-fade-out'));
+      stage.appendChild(charAvatar(playerChar(result.targetId), 120, 'avatar-fade-out', true));
       const sub = document.createElement('p');
       sub.textContent = `${playerName(result.targetId)} was weaker. Eliminated!`;
       stage.appendChild(sub);
+      stage.appendChild(taglineEl(result.tagline));
     } else {
       const sub = document.createElement('p');
       sub.textContent = `${playerName(result.targetId)} was too strong. Nothing happens.`;
@@ -300,22 +375,39 @@ function renderEffect(state) {
     }
   } else if (result.type === 'tren') {
     const h0 = document.createElement('h2');
-    h0.textContent = `TREN ACTIVATED`;
-    h0.style.color = '#c0202a';
+    h0.textContent = 'TREN ACTIVATED';
+    h0.style.color = '#1a7a3a';
     stage.appendChild(h0);
-    stage.appendChild(charAvatar(winner.character, 120, isNew ? 'pop' : ''));
+    stage.appendChild(charAvatar(winner.character, 150, isNew ? 'pop' : '', true));
     const row = document.createElement('div');
     row.style.display = 'flex';
     row.style.gap = '2rem';
     row.style.marginTop = '0.5rem';
     for (const id of result.eliminatedIds) {
-      row.appendChild(charAvatar(playerChar(id), 90, 'avatar-fade-out'));
+      row.appendChild(charAvatar(playerChar(id), 120, 'avatar-fade-out', true));
     }
     stage.appendChild(row);
     const sub = document.createElement('p');
     sub.textContent = `${winner.name} eliminates ${result.eliminatedIds.map(playerName).join(' and ')} instantly!`;
     stage.appendChild(sub);
+    stage.appendChild(taglineEl(result.tagline));
   }
+}
+
+function shotgunSVG() {
+  return `<svg viewBox="0 0 100 40" width="90" height="36" xmlns="http://www.w3.org/2000/svg">
+    <rect x="30" y="14" width="65" height="9" rx="2" fill="#5a5a5a"/>
+    <rect x="85" y="12" width="10" height="13" rx="1" fill="#2e2e2e"/>
+    <path d="M 10 18 L 32 14 L 32 26 L 14 30 Z" fill="#6b4527"/>
+    <rect x="26" y="22" width="8" height="12" rx="2" fill="#3a2712"/>
+    <path d="M 27 30 Q 30 37 34 31" fill="none" stroke="#3a2712" stroke-width="2"/>
+  </svg>`;
+}
+function muzzleFlashSVG() {
+  return `<svg viewBox="0 0 60 60" width="46" height="46" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="30,0 36,22 58,22 40,34 46,58 30,44 14,58 20,34 2,22 24,22" fill="#fff6c0"/>
+    <polygon points="30,10 34,24 48,24 36,32 40,48 30,38 20,48 24,32 12,24 26,24" fill="#ffd23f"/>
+  </svg>`;
 }
 
 function renderLeaderboard(state) {
@@ -392,7 +484,7 @@ function renderEnd(state) {
   avatarsRow.style.gap = '2rem';
   avatarsRow.style.margin = '1rem 0';
   for (const w of winners) {
-    avatarsRow.appendChild(charAvatar(w.character, isMulti ? 150 : 220));
+    avatarsRow.appendChild(charAvatar(w.character, isMulti ? 150 : 220, '', true));
   }
   container.appendChild(avatarsRow);
 

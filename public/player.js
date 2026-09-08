@@ -14,12 +14,12 @@ let selectedTargets = [];
 let lastBiddingItemId = null;
 let lastEffectKey = null;
 
-function charAvatarEl(characterId, size, extraClass = '') {
+function charAvatarEl(characterId, size, extraClass = '', full = false) {
   const div = document.createElement('div');
-  div.className = `char-avatar ${extraClass}`;
+  div.className = `char-avatar ${full ? 'full-body' : ''} ${extraClass}`;
   div.style.width = size + 'px';
   div.style.height = size + 'px';
-  div.innerHTML = characterId ? characterSVG(characterId, Math.round(size * 0.9)) : '';
+  div.innerHTML = characterId ? characterSVG(characterId, Math.round(size * 0.9), { full }) : '';
   return div;
 }
 
@@ -108,7 +108,7 @@ function renderCharSelect(state) {
   for (const c of state.characters) {
     const opt = document.createElement('div');
     opt.className = 'char-option' + (c.taken ? ' taken' : ' pickable');
-    opt.appendChild(charAvatarEl(c.id, 72));
+    opt.appendChild(charAvatarEl(c.id, 84, '', true));
     const name = document.createElement('div');
     name.className = 'cname';
     name.textContent = c.name;
@@ -152,6 +152,7 @@ function renderGame(state) {
     el('itemName').textContent = state.currentItem ? state.currentItem.name : '';
     el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';
     el('itemIcon').innerHTML = state.currentItem ? itemIconSVG(state.currentItem.id, 80) : '';
+    el('itemCard').classList.toggle('tren-glow', !!state.currentItem && state.currentItem.id === 'tren');
 
     const bidForm = el('bidForm');
     const submittedNote = el('bidSubmittedNote');
@@ -321,6 +322,24 @@ function renderRevealEffect(state) {
           ? `${winnerName} clawed you for ${r.amount} Strength!`
           : `${winnerName} clawed ${targetName} for ${r.amount} Strength.`;
       cls = amTarget ? 'bad' : 'good';
+    } else if (r.type === 'stampede') {
+      const targetName = playerName(state, r.eliminatedId);
+      const amEliminated = r.eliminatedId === me.id;
+      title = amEliminated
+        ? `A stampede came out of nowhere — you're trampled!`
+        : iAmWinner
+          ? `You triggered a stampede! ${targetName} got trampled.`
+          : `A stampede eliminated ${targetName}!`;
+      cls = amEliminated ? 'bad' : 'good';
+    } else if (r.type === 'thorn_bush') {
+      const targetName = playerName(state, r.targetId);
+      const amTarget = r.targetId === me.id;
+      title = iAmWinner
+        ? `You drove ${targetName} into the thorns! -${r.amount} Strength.`
+        : amTarget
+          ? `${winnerName} drove you into the thorns! -${r.amount} Strength.`
+          : `${winnerName} drove ${targetName} into the thorns. -${r.amount} Strength.`;
+      cls = amTarget ? 'bad' : 'good';
     } else if (r.type === 'poisoned_carcass') {
       title = iAmWinner
         ? `You planted a poisoned carcass. Your target won't see it coming...`
@@ -349,9 +368,16 @@ function renderRevealEffect(state) {
     }
 
     const banner = document.createElement('div');
-    banner.className = `result-banner ${cls}`;
+    banner.className = `result-banner ${cls}${r.type === 'tren' ? ' tren' : ''}`;
     banner.textContent = title;
     content.appendChild(banner);
+
+    if (r.tagline) {
+      const tag = document.createElement('p');
+      tag.className = 'elim-tagline-p';
+      tag.textContent = r.tagline;
+      content.appendChild(tag);
+    }
   }
 }
 
@@ -393,7 +419,7 @@ function renderEnd(state) {
   avatarsRow.style.display = 'flex';
   avatarsRow.style.justifyContent = 'center';
   avatarsRow.style.gap = '1rem';
-  for (const w of winners) avatarsRow.appendChild(charAvatarEl(w.character, isMulti ? 100 : 160));
+  for (const w of winners) avatarsRow.appendChild(charAvatarEl(w.character, isMulti ? 100 : 160, '', true));
   card.appendChild(avatarsRow);
 
   const h2 = document.createElement('h2');

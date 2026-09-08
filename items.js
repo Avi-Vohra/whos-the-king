@@ -27,6 +27,11 @@ const ITEMS = {
     flavor: 'A fierce hunting partner who answers to only one lion.',
     strengthGain: 25,
   },
+  great_migration: {
+    id: 'great_migration', name: 'The Great Migration', type: 'strength',
+    flavor: 'A river of prey stretching to the horizon. Feast like never before.',
+    strengthGain: 20,
+  },
   ambush_spot: {
     id: 'ambush_spot', name: "Rival Pride's Ambush Spot", type: 'attack', power: 'ambush',
     flavor: 'The perfect vantage point. From here, you strike the weakest first.',
@@ -43,6 +48,14 @@ const ITEMS = {
     id: 'hyena_pack', name: 'Hyena Pack', type: 'attack', power: 'hyena_pack',
     flavor: 'Send the pack after a rival. If they are weaker, they will not survive.',
   },
+  thorn_bush_ambush: {
+    id: 'thorn_bush_ambush', name: 'Thorn Bush Ambush', type: 'attack', power: 'thorn_bush',
+    flavor: 'Choose a rival to drive into the thorns. Painful, not deadly.',
+  },
+  stampede: {
+    id: 'stampede', name: 'Stampede', type: 'attack', power: 'stampede',
+    flavor: 'The herd runs wild. Someone out there is about to get trampled - not up to you who.',
+  },
   tren: {
     id: 'tren', name: 'Tren', type: 'attack', power: 'tren',
     flavor: 'Veins bulge. Eyes go wide. You have never felt this strong in your life.',
@@ -53,15 +66,13 @@ const ITEMS = {
   },
 };
 
-// Strength items are front-loaded into the early rounds (players need a
-// base of Strength before the attack items start flying), and attack items
-// fill the back half. No item repeats within a single game.
-const STRENGTH_IDS = ['fresh_kill', 'watering_hole', 'aura', 'prime_territory', 'loyal_lioness'];
-const REGULAR_ATTACK_IDS = ['ambush_spot', 'sharpened_claw', 'poisoned_carcass', 'hyena_pack'];
+const STRENGTH_IDS = ['fresh_kill', 'watering_hole', 'aura', 'prime_territory', 'loyal_lioness', 'great_migration'];
+const REGULAR_ATTACK_IDS = ['ambush_spot', 'sharpened_claw', 'poisoned_carcass', 'hyena_pack', 'thorn_bush_ambush', 'stampede'];
+const FILLER_POOL = [...STRENGTH_IDS, ...REGULAR_ATTACK_IDS];
 
-const TOTAL_ROUNDS = 8;
-const STRENGTH_ROUNDS = 4;
-const ATTACK_ROUNDS = TOTAL_ROUNDS - STRENGTH_ROUNDS;
+const TOTAL_ROUNDS = 12;
+const STRENGTH_ONLY_ROUNDS = 2; // rounds 1-2, index 0-1
+const BACK_HALF_START_INDEX = 6; // rounds 7-12 (0-indexed 6..11)
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -71,34 +82,32 @@ function shuffle(arr) {
   }
   return a;
 }
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 // Builds an ordered list of TOTAL_ROUNDS item ids for one game.
-// Rounds 1..STRENGTH_ROUNDS are distinct strength items (front-loaded).
-// Rounds after that are attack-phase: 'tren' exactly once (not the very
-// first attack round, for maximum impact), 'red_butt_baboon' exactly once
-// (no visual distinction from other items), plus distinct regular attacks
-// filling any remaining slots. No item ever repeats within a game.
+// Rounds 1-2 are always distinct strength items. 'tren' and
+// 'red_butt_baboon' each appear exactly once, both placed somewhere in the
+// back half (rounds 7-12), in different rounds. Every other round is filled
+// by drawing (with repetition) from the full strength+attack pool.
 function generateItemQueue() {
-  const strengthPicks = shuffle(STRENGTH_IDS).slice(0, STRENGTH_ROUNDS);
+  const slots = new Array(TOTAL_ROUNDS).fill(null);
 
-  const regularAttackSlots = ATTACK_ROUNDS - 2; // minus tren + baboon
-  const regularAttackPicks = shuffle(REGULAR_ATTACK_IDS).slice(0, Math.max(0, regularAttackSlots));
+  const openers = shuffle(STRENGTH_IDS).slice(0, STRENGTH_ONLY_ROUNDS);
+  for (let i = 0; i < STRENGTH_ONLY_ROUNDS; i++) slots[i] = openers[i];
 
-  const others = shuffle([...regularAttackPicks, 'red_butt_baboon']);
-  const trenIndex = ATTACK_ROUNDS > 1 ? 1 + Math.floor(Math.random() * (ATTACK_ROUNDS - 1)) : 0;
+  const backHalfIndices = [];
+  for (let i = BACK_HALF_START_INDEX; i < TOTAL_ROUNDS; i++) backHalfIndices.push(i);
+  const shuffledBack = shuffle(backHalfIndices);
+  slots[shuffledBack[0]] = 'red_butt_baboon';
+  slots[shuffledBack[1]] = 'tren';
 
-  const attackPhase = [];
-  let oi = 0;
-  for (let i = 0; i < ATTACK_ROUNDS; i++) {
-    if (i === trenIndex) {
-      attackPhase.push('tren');
-    } else {
-      attackPhase.push(others[oi]);
-      oi += 1;
-    }
+  for (let i = STRENGTH_ONLY_ROUNDS; i < TOTAL_ROUNDS; i++) {
+    if (slots[i] === null) slots[i] = pickRandom(FILLER_POOL);
   }
 
-  return [...strengthPicks, ...attackPhase].map((id) => ITEMS[id]);
+  return slots.map((id) => ITEMS[id]);
 }
 
 module.exports = { ITEMS, generateItemQueue, TOTAL_ROUNDS };

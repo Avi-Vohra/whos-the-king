@@ -26,3 +26,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v6** — Chopped Lion pushed funnier-ugly (derp/squint mismatched eyes, snaggletooth, bulbous nose). Item reveal now does a real 3D card-flip + icon spin-in every new item (previously the pop-in animation never replayed after the first item). Victory screen gets a falling confetti burst behind the crown.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `5d6411c`
+
+- **v7** — Self-audit: full socket-driven games simulated at 2/3/4/6/8 players (no crashes, no self-targeting, Tren/Baboon exactly once each game, correct King/fallen endings). Tiny Terror rebuilt (was shrunk to 68% leaving him tiny/empty-looking vs the rest of the roster; now 88%, tapered torso, tail off the fist). Cute Lion's chibi body proportions nudged slightly larger.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `477eabf`

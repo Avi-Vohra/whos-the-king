@@ -46,3 +46,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v11** — Bald Lion's crossed arms were tucked so tight to the body he read as visibly narrower/smaller than the rest of the roster; flared the elbows outward so the pose is both clearer and gives him proper silhouette presence. Re-ran self-audit sims at 4/6/8 players post-fix: all clean (Tren/Baboon exactly once, no self-targeting, correct endings).
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `c929542`
+
+- **v12** — Found via systematic bbox comparison (not eyeballing): Avi's bicep/fist geometry extended past both edges of the SVG canvas, silently clipping both fists in half on every render. Pulled the geometry inward while keeping the same muscle definition. Re-checked bounding boxes for all 10 characters - all now fully within canvas.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `a3cae27`

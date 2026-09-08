@@ -61,6 +61,7 @@ function render(state) {
     lobbySection.classList.remove('hidden');
     gameSection.classList.add('hidden');
     endSection.classList.add('hidden');
+    hasPlayedVictoryRoar = false;
     renderLobby(state);
     return;
   }
@@ -680,6 +681,55 @@ function renderLeaderboard(state) {
   }
 }
 
+let hasPlayedVictoryRoar = false;
+
+function playVictoryRoar() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.5, now + 0.08);
+    master.gain.exponentialRampToValueAtTime(0.4, now + 0.9);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+    master.connect(ctx.destination);
+
+    // Low growling sweep - the "roar" body.
+    const roar = ctx.createOscillator();
+    roar.type = 'sawtooth';
+    roar.frequency.setValueAtTime(90, now);
+    roar.frequency.exponentialRampToValueAtTime(160, now + 0.25);
+    roar.frequency.exponentialRampToValueAtTime(70, now + 1.6);
+    const roarFilter = ctx.createBiquadFilter();
+    roarFilter.type = 'lowpass';
+    roarFilter.frequency.setValueAtTime(400, now);
+    roarFilter.frequency.linearRampToValueAtTime(1200, now + 0.3);
+    roarFilter.frequency.linearRampToValueAtTime(300, now + 1.6);
+    roar.connect(roarFilter).connect(master);
+    roar.start(now);
+    roar.stop(now + 1.8);
+
+    // Noisy rasp texture layered underneath for a growl.
+    const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 1.8, ctx.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(500, now);
+    noiseFilter.Q.value = 1.2;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.5, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+    noise.connect(noiseFilter).connect(noiseGain).connect(master);
+    noise.start(now);
+    noise.stop(now + 1.8);
+
+    setTimeout(() => ctx.close(), 2200);
+  } catch (e) { /* audio unsupported or blocked - silently skip */ }
+}
+
 function renderEnd(state) {
   const result = state.endResult;
   if (!result) return;
@@ -694,6 +744,10 @@ function renderEnd(state) {
   }
   const winners = result.winners;
   const isMulti = winners.length > 1;
+  if (!hasPlayedVictoryRoar) {
+    hasPlayedVictoryRoar = true;
+    playVictoryRoar();
+  }
   endSection.innerHTML = '';
   const container = document.createElement('div');
   container.className = 'crown-screen';

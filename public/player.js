@@ -379,13 +379,41 @@ function renderRevealEffect(state) {
     } else if (r.type === 'baboon') {
       title = iAmWinner ? `🐒 BLAM! The Red-Butt Baboon got you. You're out!` : `🐒 BLAM! The Red-Butt Baboon eliminated ${winnerName}!`;
       cls = iAmWinner ? 'bad' : 'good';
-    } else if (r.type === 'ambush') {
+    } else if (r.type === 'fight_win') {
       const targetName = playerName(state, r.eliminatedId);
       const amEliminated = r.eliminatedId === me.id;
       title = amEliminated
-        ? `You had the lowest Strength — ambushed and eliminated!`
-        : `${winnerName} ambushed ${targetName} (lowest Strength). Eliminated!`;
+        ? `You lost the fight! ${winnerName} wins (${r.attackerTaps}-${r.defenderTaps} taps).`
+        : iAmWinner
+          ? `You won the fight! ${targetName} is eliminated (${r.attackerTaps}-${r.defenderTaps} taps).`
+          : `${winnerName} won the fight! ${targetName} eliminated (${r.attackerTaps}-${r.defenderTaps} taps).`;
       cls = amEliminated ? 'bad' : 'good';
+    } else if (r.type === 'fight_loss') {
+      const amAttacker = r.winnerId === me.id;
+      const amDefender = r.defenderId === me.id;
+      title = amAttacker
+        ? `You lost the fight and took -${r.penalty} Strength.`
+        : amDefender
+          ? `You fought off ${winnerName}! They lose ${r.penalty} Strength.`
+          : `${playerName(state, r.defenderId)} fought off ${winnerName}, who loses ${r.penalty} Strength.`;
+      cls = amAttacker ? 'bad' : 'good';
+    } else if (r.type === 'vultures_mark') {
+      const amTarget = r.targetId === me.id;
+      title = iAmWinner
+        ? `You marked ${playerName(state, r.targetId)} for the vultures. They won't see it coming.`
+        : amTarget
+          ? `${winnerName} marked you for the vultures. Something's coming next round...`
+          : `${winnerName} marked ${playerName(state, r.targetId)} for the vultures.`;
+      cls = amTarget ? 'bad' : 'good';
+    } else if (r.type === 'locked_horns') {
+      const targetName = playerName(state, r.targetId);
+      const amTarget = r.targetId === me.id;
+      title = iAmWinner
+        ? `You locked horns with ${targetName}! -${r.amount} Strength for them.`
+        : amTarget
+          ? `${winnerName} locked horns with you! -${r.amount} Strength.`
+          : `${winnerName} locked horns with ${targetName}. -${r.amount} Strength.`;
+      cls = amTarget ? 'bad' : 'good';
     } else if (r.type === 'sharpened_claw') {
       const targetName = playerName(state, r.targetId);
       const amTarget = r.targetId === me.id;
@@ -395,15 +423,6 @@ function renderRevealEffect(state) {
           ? `${winnerName} clawed you for ${r.amount} Strength!`
           : `${winnerName} clawed ${targetName} for ${r.amount} Strength.`;
       cls = amTarget ? 'bad' : 'good';
-    } else if (r.type === 'stampede') {
-      const targetName = playerName(state, r.eliminatedId);
-      const amEliminated = r.eliminatedId === me.id;
-      title = amEliminated
-        ? `A stampede came out of nowhere — you're trampled!`
-        : iAmWinner
-          ? `You triggered a stampede! ${targetName} got trampled.`
-          : `A stampede eliminated ${targetName}!`;
-      cls = amEliminated ? 'bad' : 'good';
     } else if (r.type === 'thorn_bush') {
       const targetName = playerName(state, r.targetId);
       const amTarget = r.targetId === me.id;
@@ -417,19 +436,6 @@ function renderRevealEffect(state) {
       title = iAmWinner
         ? `You planted a poisoned carcass. Your target won't see it coming...`
         : `${winnerName} planted a poisoned carcass somewhere out there...`;
-    } else if (r.type === 'hyena_pack') {
-      const targetName = playerName(state, r.targetId);
-      const amTarget = r.targetId === me.id;
-      if (r.success) {
-        title = amTarget
-          ? `The hyenas were sent after you — and you were weaker. Eliminated!`
-          : `${winnerName} sent hyenas after ${targetName}. Eliminated!`;
-        cls = amTarget ? 'bad' : 'good';
-      } else {
-        title = amTarget
-          ? `${winnerName} sent hyenas after you, but you were too strong. Nothing happens.`
-          : `${winnerName} sent hyenas after ${targetName}, but nothing happened.`;
-      }
     } else if (r.type === 'tren') {
       const amEliminated = r.eliminatedIds.includes(me.id);
       title = amEliminated

@@ -377,6 +377,28 @@ function renderEffect(state) {
     return p;
   }
 
+  function mournersRow(excludeIds) {
+    const remaining = state.players.filter((p) => p.active && !excludeIds.includes(p.id));
+    if (remaining.length === 0) return null;
+    const wrap = document.createElement('div');
+    wrap.className = 'mourners-row';
+    const caption = document.createElement('div');
+    caption.className = 'mourners-caption';
+    caption.textContent = 'The pride watches in silence...';
+    wrap.appendChild(caption);
+    const row = document.createElement('div');
+    row.className = 'mourners-avatars';
+    for (const p of remaining.slice(0, 6)) row.appendChild(charAvatar(p.character, 56));
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  function impactBurst() {
+    const burst = document.createElement('div');
+    burst.className = 'impact-lines';
+    return burst;
+  }
+
   if (result.fizzled) {
     stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
@@ -431,28 +453,62 @@ function renderEffect(state) {
     sub.textContent = '🐒 The Red-Butt Baboon strikes again. Eliminated!';
     stage.appendChild(sub);
     stage.appendChild(taglineEl(result.tagline));
-  } else if (result.type === 'ambush') {
-    stage.appendChild(charAvatar(winner.character, 130, '', true));
+    const baboonMourn = mournersRow([winner.id]);
+    if (baboonMourn) stage.appendChild(baboonMourn);
+  } else if (result.type === 'fight_win') {
+    const row = document.createElement('div');
+    row.className = 'fight-result-row';
+    row.appendChild(charAvatar(winner.character, 140, isNew ? 'pop' : '', true));
+    row.appendChild(impactBurst());
+    row.appendChild(charAvatar(playerChar(result.eliminatedId), 140, 'collapse-fall', true));
+    stage.appendChild(row);
     const h = document.createElement('h2');
-    h.textContent = `${winner.name} sprung the ambush!`;
+    h.textContent = `${winner.name} won the fight!`;
     stage.appendChild(h);
-    const vic = charAvatar(playerChar(result.eliminatedId), 120, 'avatar-fade-out', true);
-    stage.appendChild(vic);
     const sub = document.createElement('p');
-    sub.textContent = `${playerName(result.eliminatedId)} (lowest Strength) is eliminated!`;
+    sub.textContent = `${playerName(result.eliminatedId)} (${result.defenderTaps} taps) couldn't out-fight ${winner.name} (${result.attackerTaps} taps). Eliminated!`;
     stage.appendChild(sub);
     stage.appendChild(taglineEl(result.tagline));
-  } else if (result.type === 'stampede') {
+    const mourn = mournersRow([winner.id, result.eliminatedId]);
+    if (mourn) stage.appendChild(mourn);
+  } else if (result.type === 'fight_loss') {
+    const defender = state.players.find((p) => p.id === result.defenderId);
+    const row = document.createElement('div');
+    row.className = 'fight-result-row';
+    row.appendChild(charAvatar(defender ? defender.character : null, 140, 'pop', true));
+    row.appendChild(impactBurst());
+    row.appendChild(charAvatar(winner.character, 140, 'stagger-hit', true));
+    stage.appendChild(row);
+    const h = document.createElement('h2');
+    h.textContent = `${defender ? defender.name : 'The defender'} fought them off!`;
+    stage.appendChild(h);
+    const pop = document.createElement('div');
+    pop.className = 'stat-pop loss';
+    pop.textContent = `-${result.penalty} Strength`;
+    stage.appendChild(pop);
+    const sub = document.createElement('p');
+    sub.textContent = `${winner.name} (${result.attackerTaps} taps) lost the fight to ${defender ? defender.name : '???'} (${result.defenderTaps} taps).`;
+    stage.appendChild(sub);
+  } else if (result.type === 'vultures_mark') {
     stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
-    h.textContent = `${winner.name} triggered a stampede!`;
+    h.textContent = `${winner.name} marks ${playerName(result.targetId)} for the vultures...`;
     stage.appendChild(h);
-    const vic = charAvatar(playerChar(result.eliminatedId), 120, 'avatar-fade-out', true);
-    stage.appendChild(vic);
     const sub = document.createElement('p');
-    sub.textContent = `${playerName(result.eliminatedId)} never saw it coming. Eliminated!`;
+    sub.textContent = `Next round, a third of their Strength vanishes. No warning.`;
     stage.appendChild(sub);
-    stage.appendChild(taglineEl(result.tagline));
+  } else if (result.type === 'locked_horns') {
+    stage.appendChild(charAvatar(winner.character, 130, '', true));
+    const h = document.createElement('h2');
+    h.textContent = `${winner.name} locks horns with ${playerName(result.targetId)}!`;
+    stage.appendChild(h);
+    const pop = document.createElement('div');
+    pop.className = 'stat-pop loss';
+    pop.textContent = `-${result.amount} Strength`;
+    stage.appendChild(pop);
+    const sub = document.createElement('p');
+    sub.textContent = `${playerName(result.targetId)} staggers back, weaker for it.`;
+    stage.appendChild(sub);
   } else if (result.type === 'sharpened_claw') {
     stage.appendChild(charAvatar(winner.character, 130, '', true));
     const h = document.createElement('h2');
@@ -485,24 +541,6 @@ function renderEffect(state) {
     const sub = document.createElement('p');
     sub.textContent = 'Somewhere out there, a rival will regret this. No one knows who yet...';
     stage.appendChild(sub);
-  } else if (result.type === 'hyena_pack') {
-    stage.appendChild(charAvatar(winner.character, 130, '', true));
-    const h = document.createElement('h2');
-    h.textContent = result.success
-      ? `The hyenas take down ${playerName(result.targetId)}!`
-      : `The hyenas backed off...`;
-    stage.appendChild(h);
-    if (result.success) {
-      stage.appendChild(charAvatar(playerChar(result.targetId), 120, 'avatar-fade-out', true));
-      const sub = document.createElement('p');
-      sub.textContent = `${playerName(result.targetId)} was weaker. Eliminated!`;
-      stage.appendChild(sub);
-      stage.appendChild(taglineEl(result.tagline));
-    } else {
-      const sub = document.createElement('p');
-      sub.textContent = `${playerName(result.targetId)} was too strong. Nothing happens.`;
-      stage.appendChild(sub);
-    }
   } else if (result.type === 'tren') {
     const h0 = document.createElement('h2');
     h0.textContent = 'TREN ACTIVATED';
@@ -521,6 +559,8 @@ function renderEffect(state) {
     sub.textContent = `${winner.name} eliminates ${result.eliminatedIds.map(playerName).join(' and ')} instantly!`;
     stage.appendChild(sub);
     stage.appendChild(taglineEl(result.tagline));
+    const trenMourn = mournersRow([winner.id, ...result.eliminatedIds]);
+    if (trenMourn) stage.appendChild(trenMourn);
   }
 }
 

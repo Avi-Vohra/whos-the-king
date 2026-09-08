@@ -78,19 +78,39 @@ const ITEM_BUILDERS = {
       <path d="M 66 58 Q 69 61 72 58" stroke="#3a2010" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
     return badge('#ffe3b0', '#e8a33d', inner);
   },
-  ambush_spot() {
+  croc_ambush() {
     const inner = `
-      <g fill="#4a8f3c">
-        <path d="M 14 88 L 22 40 L 30 88 Z"/><path d="M 28 88 L 38 34 L 46 88 Z"/>
-        <path d="M 54 88 L 62 34 L 70 88 Z"/><path d="M 70 88 L 80 40 L 88 88 Z"/>
+      <ellipse cx="50" cy="70" rx="34" ry="12" fill="#3f8fc9" opacity="0.5"/>
+      <path d="M 12 58 Q 20 46 40 48 L 46 40 L 50 48 L 56 40 L 60 48 Q 84 46 88 60
+        Q 70 66 60 60 L 30 60 Q 18 64 12 58 Z" fill="#3f7a3f"/>
+      <path d="M 40 48 L 46 40 L 50 48 L 56 40 L 60 48" fill="none" stroke="#fdf6e3" stroke-width="1.4"/>
+      <circle cx="30" cy="52" r="2.4" fill="#ffd23f"/>
+      <circle cx="30" cy="52" r="1.1" fill="#241305"/>
+      <path d="M 12 58 Q 8 66 16 70" stroke="#3f7a3f" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    return badge('#bfe0f0', '#3f7a9c', inner);
+  },
+  vultures_mark() {
+    const inner = `
+      <g fill="#3a2f2a">
+        <ellipse cx="38" cy="34" rx="12" ry="7" transform="rotate(-20 38 34)"/>
+        <ellipse cx="62" cy="34" rx="12" ry="7" transform="rotate(20 62 34)"/>
+        <circle cx="50" cy="38" r="9"/>
       </g>
-      <g fill="#3a2010">
-        <ellipse cx="42" cy="52" rx="6" ry="5"/><ellipse cx="60" cy="52" rx="6" ry="5"/>
-      </g>
-      <g fill="#ffd23f">
-        <ellipse cx="42" cy="52" rx="3" ry="4"/><ellipse cx="60" cy="52" rx="3" ry="4"/>
-      </g>`;
-    return badge('#cdeecb', '#8fcf8a', inner);
+      <path d="M 44 36 L 50 44 L 56 36" fill="#d6a020"/>
+      <circle cx="46" cy="35" r="1.6" fill="#fff"/><circle cx="54" cy="35" r="1.6" fill="#fff"/>
+      <circle cx="50" cy="70" r="16" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="5 4"/>
+      <path d="M 50 62 L 50 78 M 42 70 L 58 70" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>`;
+    return badge('#cfc3b0', '#7a6a5a', inner);
+  },
+  locked_horns() {
+    const inner = `
+      <path d="M 22 66 Q 4 54 10 30 Q 16 20 24 24 Q 18 34 22 46 Q 30 44 36 50" fill="#3a2712" stroke="#1f1409" stroke-width="1.5"/>
+      <path d="M 78 66 Q 96 54 90 30 Q 84 20 76 24 Q 82 34 78 46 Q 70 44 64 50" fill="#5a3f22" stroke="#1f1409" stroke-width="1.5"/>
+      <circle cx="37" cy="60" r="17" fill="#c9a45a"/>
+      <circle cx="63" cy="60" r="17" fill="#a9835a"/>
+      <path d="M 45 55 L 58 65 M 58 55 L 45 65" stroke="#fdf6e3" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M 27 82 L 16 92 M 73 82 L 84 92" stroke="#5a3f1f" stroke-width="3" stroke-linecap="round" opacity="0.7"/>`;
+    return badge('#e8d0a0', '#a9835a', inner);
   },
   sharpened_claw() {
     const inner = `
@@ -164,19 +184,6 @@ const ITEM_BUILDERS = {
       <circle cx="50" cy="64" r="12" fill="#d64545"/>
       <path d="M 42 64 L 58 64 M 50 56 L 50 72" stroke="#a02525" stroke-width="1.6"/>`;
     return badge('#d9e8c4', '#7a9a52', inner);
-  },
-  stampede() {
-    const inner = `
-      <g fill="#a9835a">
-        <path d="M 12 76 L 20 44 L 30 76 Z"/><path d="M 30 80 L 38 40 L 48 80 Z"/>
-        <path d="M 50 76 L 58 44 L 66 76 Z"/><path d="M 66 80 L 74 42 L 82 80 Z"/>
-      </g>
-      <g stroke="#5a3f1f" stroke-width="1.6" fill="none" opacity="0.6">
-        <path d="M 12 76 Q 20 60 20 44"/><path d="M 50 76 Q 58 60 58 44"/>
-      </g>
-      <circle cx="20" cy="50" r="1.8" fill="#241305"/><circle cx="38" cy="46" r="1.8" fill="#241305"/>
-      <circle cx="58" cy="50" r="1.8" fill="#241305"/><circle cx="74" cy="48" r="1.8" fill="#241305"/>`;
-    return badge('#e8d0a0', '#b8905a', inner);
   },
 };
 

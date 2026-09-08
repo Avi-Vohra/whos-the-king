@@ -368,22 +368,30 @@ function buildZesty() {
 
 function buildBald() {
   const g = furGrad('#e8ba76', '#c68a3f');
-  const torso = `<path d="M 54 106 Q 80 98 106 106 L 108 152 Q 80 162 52 152 Z" fill="url(#${g.id})"/>`;
-  const legs = standardLegs(80, 152, 203, 20, 19, '#c68a3f', '#a8712f');
-  // Arms crossed, dignified.
-  const arms = `<path d="M 54 112 Q 66 132 80 128 Q 94 132 106 112" stroke="#c68a3f" stroke-width="13" fill="none" stroke-linecap="round"/>
-    <circle cx="66" cy="128" r="7" fill="#a8712f"/><circle cx="94" cy="128" r="7" fill="#a8712f"/>`;
-  const necklace = `<path d="M 62 108 Q 80 120 98 108" stroke="#e0a83a" stroke-width="2.4" fill="none"/>
-    <circle cx="80" cy="118" r="5.5" fill="#e0a83a" stroke="#a87a1e" stroke-width="1.3"/>
-    <circle cx="80" cy="118" r="2.2" fill="#fff6de"/>`;
+  const skinGrad = furGrad('#eec488', '#b8802f', '32%', '18%');
+  // Sleek, toned torso - broader shoulders than the plain block before,
+  // with a hint of definition so he doesn't read as a flat body.
+  const torso = `<path d="M 48 104 Q 80 94 112 104 L 114 156 Q 80 168 46 156 Z" fill="url(#${skinGrad.id})"/>
+    <path d="M 48 104 Q 80 94 112 104 L 108 114 Q 80 106 52 114 Z" fill="#fff3d9" opacity="0.35"/>
+    <path d="M 80 128 L 80 156" stroke="#00000022" stroke-width="2.2"/>
+    <path d="M 62 132 Q 80 138 98 132" stroke="#00000018" stroke-width="2" fill="none"/>
+    <path d="M 64 144 Q 80 150 96 144" stroke="#00000018" stroke-width="2" fill="none"/>`;
+  const legs = standardLegs(80, 156, 205, 21, 20, '#c68a3f', '#a8712f');
+  // Arms crossed high on the chest - confident, dignified, clearly visible.
+  const arms = `<path d="M 50 110 Q 60 138 92 122" stroke="#c68a3f" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M 110 110 Q 100 138 68 122" stroke="#b8802f" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="92" cy="122" r="8" fill="#a8712f"/><circle cx="68" cy="122" r="8" fill="#a8712f"/>`;
+  const necklace = `<path d="M 60 106 Q 80 120 100 106" stroke="#e0a83a" stroke-width="2.6" fill="none"/>
+    <circle cx="80" cy="117" r="6" fill="#e0a83a" stroke="#a87a1e" stroke-width="1.3"/>
+    <circle cx="80" cy="117" r="2.4" fill="#fff6de"/>`;
   const face = `<ellipse cx="${HEAD_CX - 9}" cy="${HEAD_CY - 19}" rx="8" ry="5" fill="#fff" opacity="0.45"/>`
     + BROW.raisedOne(HEAD_CX, HEAD_CY - 4)
     + EYE.smirk(HEAD_CX, HEAD_CY - 2)
     + nose(HEAD_CX, HEAD_CY + 11, '#4a2712')
     + MOUTH.smirk(HEAD_CX, HEAD_CY + 16);
 
-  return `<defs>${g.defs}</defs>`
-    + tail(100, 150, '#c68a3f', '#a8712f', 1)
+  return `<defs>${g.defs}${skinGrad.defs}</defs>`
+    + tail(104, 152, '#c68a3f', '#a8712f', 1)
     + legs + torso + arms
     + headBase(`url(#${g.id})`, HEAD_CX, HEAD_CY, 28, '#e0a352', '#c68a3f', '#ffe7bb')
     + necklace + face;

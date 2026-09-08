@@ -50,3 +50,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v12** — Found via systematic bbox comparison (not eyeballing): Avi's bicep/fist geometry extended past both edges of the SVG canvas, silently clipping both fists in half on every render. Pulled the geometry inward while keeping the same muscle definition. Re-checked bounding boxes for all 10 characters - all now fully within canvas.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `a3cae27`
+
+- **v13** — Mechanics audit this pass: confirmed mid-game joins are correctly rejected, reconnects work regardless of phase, and leaderboard already distinguishes eliminated players clearly. Small UX fix: the bid input now caps at the player's current Roars for native browser validation.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `4191f6a`

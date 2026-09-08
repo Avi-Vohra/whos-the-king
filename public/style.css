@@ -18,11 +18,31 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--orange) 55%, var(--orange-dark) 100%);
   color: var(--brown-dark);
 }
+
+body {
+  position: relative;
+  background:
+    radial-gradient(circle at 82% 12%, rgba(255,246,200,0.85) 0%, rgba(255,246,200,0) 16%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--orange) 55%, var(--orange-dark) 100%);
+  background-attachment: fixed;
+}
+body::after {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 34vh;
+  min-height: 230px;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('savanna-bg.svg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.wrap { position: relative; z-index: 1; }
 
 button {
   font-family: inherit;

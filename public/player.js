@@ -204,14 +204,15 @@ function renderGame(state) {
     return;
   }
 
-  // bid_reveal / target_select (not me) / effect_reveal
-  el('revealEffectView').classList.remove('hidden');
-  renderRevealEffect(state);
-
   if (state.phase === 'leaderboard') {
     el('leaderboardView').classList.remove('hidden');
     renderLeaderboard(state);
+    return;
   }
+
+  // bid_reveal / target_select (not me) / effect_reveal
+  el('revealEffectView').classList.remove('hidden');
+  renderRevealEffect(state);
 }
 
 function renderQuickBids(roars) {

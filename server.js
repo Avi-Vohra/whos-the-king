@@ -196,7 +196,10 @@ function syncRoom(room) {
 
   for (const p of room.players.values()) {
     if (!p.socketId) continue;
-    io.to(p.socketId).emit('player:state', {
+    // Broadcast to every tab this player has open (not just the latest
+    // socket) so a reconnect from a second tab doesn't leave the first
+    // one permanently stale.
+    io.to(p.id).emit('player:state', {
       ...base,
       me: publicPlayer(p),
       currentItem: currentItemPublic(room),
@@ -359,7 +362,7 @@ function resolveItemEffect(room, winner, item) {
   syncRoom(room);
 
   if (winner.socketId) {
-    io.to(winner.socketId).emit('player:target-select-prompt', {
+    io.to(winner.id).emit('player:target-select-prompt', {
       itemId: item.id,
       itemName: item.name,
       count,
@@ -584,6 +587,7 @@ io.on('connection', (socket) => {
       socket.data.roomCode = room.code;
       socket.data.playerId = existingPlayerId;
       socket.join(room.code);
+      socket.join(existingPlayerId);
       cb && cb({ ok: true, playerId: existingPlayerId, code: room.code });
       syncRoom(room);
       return;
@@ -611,6 +615,7 @@ io.on('connection', (socket) => {
     socket.data.roomCode = room.code;
     socket.data.playerId = playerId;
     socket.join(room.code);
+    socket.join(playerId);
     cb && cb({ ok: true, playerId, code: room.code });
     syncRoom(room);
   });

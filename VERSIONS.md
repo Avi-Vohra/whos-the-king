@@ -58,3 +58,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v14** — Edge-case pass (bid of 0, bid of full Roars/all-in, rapid double-clicks, browser back button): all clean except one real bug found via the back-button test - the player screen showed an empty stray card above the leaderboard (a leftover effect-reveal container that was shown unconditionally for every non-bidding phase, including leaderboard, but has no leaderboard content). Fixed - leaderboard now renders exclusively.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `28a8f99`
+
+- **v15** (final, this session) — Found via multi-tab edge-case testing: a player's old browser tab silently stopped receiving any further state updates after they reconnected from a second tab (backgrounded tab reawakening, reopening a bookmarked link) - it would freeze forever with no update and no error. Fixed by broadcasting to a per-player socket.io room instead of a single tracked socket, so every open tab for a player stays live. Verified with a scripted two-tab test and a full socket-driven game on the live server (no crashes, no self-targeting, correct ending).
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `edde882`

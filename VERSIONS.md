@@ -54,3 +54,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v13** — Mechanics audit this pass: confirmed mid-game joins are correctly rejected, reconnects work regardless of phase, and leaderboard already distinguishes eliminated players clearly. Small UX fix: the bid input now caps at the player's current Roars for native browser validation.
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `4191f6a`
+
+- **v14** — Edge-case pass (bid of 0, bid of full Roars/all-in, rapid double-clicks, browser back button): all clean except one real bug found via the back-button test - the player screen showed an empty stray card above the leaderboard (a leftover effect-reveal container that was shown unconditionally for every non-bidding phase, including leaderboard, but has no leaderboard content). Fixed - leaderboard now renders exclusively.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `28a8f99`

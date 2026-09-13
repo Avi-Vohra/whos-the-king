@@ -62,3 +62,7 @@ Player: http://192.168.0.28:3000/player.html
 - **v15** (final, this session) — Found via multi-tab edge-case testing: a player's old browser tab silently stopped receiving any further state updates after they reconnected from a second tab (backgrounded tab reawakening, reopening a bookmarked link) - it would freeze forever with no update and no error. Fixed by broadcasting to a per-player socket.io room instead of a single tracked socket, so every open tab for a player stays live. Verified with a scripted two-tab test and a full socket-driven game on the live server (no crashes, no self-targeting, correct ending).
   Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
   Commit: `edde882`
+
+- **v16** — Bidding drama pass: avatars now idle-wobble while a player hasn't bid yet, and pop when they submit. The bid reveal builds suspense (lowest bid revealed first, winner always last, gold flash on the winner once their count-up finishes) instead of showing every number at once.
+  Host: http://localhost:3000/host.html · Player: http://192.168.0.28:3000/player.html
+  Commit: `8c73930`

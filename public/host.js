@@ -160,6 +160,7 @@ function renderLionessCinematic(state) {
 }
 
 let lastItemKey = null;
+let lastSubmittedSet = new Set();
 
 function renderBidding(state) {
   el('itemFlavor').textContent = state.currentItem ? state.currentItem.flavor : '';
@@ -180,6 +181,7 @@ function renderBidding(state) {
   const itemKey = state.currentItem ? `${state.round}:${state.currentItem.id}` : null;
   if (itemKey && itemKey !== lastItemKey) {
     lastItemKey = itemKey;
+    lastSubmittedSet = new Set();
     const card = el('itemCard');
     card.classList.remove('card-flip-in');
     const iconWrap = el('itemIcon');
@@ -194,8 +196,11 @@ function renderBidding(state) {
   const active = state.players.filter((p) => p.active);
   const submitted = new Set((state.bidProgress && state.bidProgress.submitted) || []);
   for (const p of active) {
+    const justSubmitted = submitted.has(p.id) && !lastSubmittedSet.has(p.id);
     const card = document.createElement('div');
-    card.className = 'bid-progress-card' + (submitted.has(p.id) ? ' submitted' : '');
+    card.className = 'bid-progress-card'
+      + (submitted.has(p.id) ? ' submitted' : ' thinking')
+      + (justSubmitted ? ' just-submitted' : '');
     card.appendChild(charAvatar(p.character, 60));
     const name = document.createElement('div');
     name.textContent = p.name;
@@ -209,6 +214,7 @@ function renderBidding(state) {
     }
     grid.appendChild(card);
   }
+  lastSubmittedSet = submitted;
 }
 
 let lastRevealKey = null;
@@ -223,6 +229,12 @@ function animateCountUp(el, target, duration = 550) {
   requestAnimationFrame(tick);
 }
 
+let revealTimers = [];
+function clearRevealTimers() {
+  revealTimers.forEach((t) => clearTimeout(t));
+  revealTimers = [];
+}
+
 function renderReveal(state) {
   const br = state.bidReveal;
   if (!br) return;
@@ -232,10 +244,15 @@ function renderReveal(state) {
   const revealKey = state.round + ':' + br.bids.map((b) => b.playerId + b.amount).join(',');
   const isNewReveal = revealKey !== lastRevealKey;
   lastRevealKey = revealKey;
-  const sorted = br.bids.slice().sort((a, b) => b.amount - a.amount);
-  for (const b of sorted) {
+  if (isNewReveal) clearRevealTimers();
+
+  // Ascending order builds suspense: lowest bids reveal first, the winner
+  // (highest bid) is always revealed last with an extra flourish.
+  const sorted = br.bids.slice().sort((a, b) => a.amount - b.amount);
+  sorted.forEach((b, i) => {
+    const isWinner = b.playerId === br.winnerId;
     const row = document.createElement('div');
-    row.className = 'reveal-row' + (b.playerId === br.winnerId ? ' winner' : '');
+    row.className = 'reveal-row' + (!isNewReveal && isWinner ? ' winner' : '');
     const who = document.createElement('div');
     who.className = 'who';
     who.appendChild(charAvatar(b.character, 50));
@@ -245,15 +262,29 @@ function renderReveal(state) {
     row.appendChild(who);
     const amt = document.createElement('div');
     amt.className = 'amount';
+
     if (isNewReveal) {
+      row.classList.add('pending-reveal');
       amt.textContent = '0 🔥';
-      animateCountUp(amt, b.amount);
+      row.appendChild(amt);
+      rows.appendChild(row);
+      const delay = i * 380;
+      revealTimers.push(setTimeout(() => {
+        row.classList.remove('pending-reveal');
+        row.classList.add('revealed');
+        animateCountUp(amt, b.amount);
+        if (isWinner) {
+          revealTimers.push(setTimeout(() => {
+            row.classList.add('winner', 'winner-flash');
+          }, 650));
+        }
+      }, delay));
     } else {
       amt.textContent = `${b.amount} 🔥`;
+      row.appendChild(amt);
+      rows.appendChild(row);
     }
-    row.appendChild(amt);
-    rows.appendChild(row);
-  }
+  });
 
   const note = el('revealNote');
   if (state.phase === 'target_select') {

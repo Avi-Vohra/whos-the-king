@@ -107,7 +107,7 @@ body {
   text-align: center;
   position: relative;
 }
-.bid-progress-card .char-avatar { width: 60px; height: 60px; margin: 0 auto 0.3rem; }
+.bid-progress-card .char-avatar { width: 60px; height: 60px; margin: 0 auto 0.3rem; transform-origin: 50% 85%; }
 .bid-progress-card.submitted { box-shadow: 0 0 0 4px var(--green) inset; }
 .bid-progress-card .check {
   position: absolute; top: -8px; right: -8px;
@@ -115,6 +115,24 @@ body {
   width: 26px; height: 26px; font-weight: 900;
   display: flex; align-items: center; justify-content: center;
   border: 2px solid #fff;
+}
+/* Idle "thinking" wobble while a player hasn't bid yet - staggered per card
+   so the whole grid doesn't bob in lockstep. */
+.bid-progress-card.thinking .char-avatar { animation: idle-think 2.6s ease-in-out infinite; }
+.bid-progress-card.thinking:nth-child(2n) .char-avatar { animation-delay: 0.35s; }
+.bid-progress-card.thinking:nth-child(3n) .char-avatar { animation-delay: 0.7s; }
+.bid-progress-card.thinking:nth-child(5n) .char-avatar { animation-delay: 1.1s; }
+@keyframes idle-think {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-3.5deg) translateY(-2px); }
+  50% { transform: rotate(0deg) translateY(0); }
+  75% { transform: rotate(3.5deg) translateY(-2px); }
+}
+.bid-progress-card.just-submitted { animation: submit-pop 0.45s cubic-bezier(.34,1.56,.64,1); }
+@keyframes submit-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 .reveal-row {
@@ -133,6 +151,28 @@ body {
 .reveal-row .amount { font-size: 1.4rem; font-weight: 900; color: var(--orange-dark); }
 .reveal-row.winner { background: var(--gold-light); box-shadow: 0 0 0 4px var(--gold) inset; }
 .reveal-row.winner .amount::after { content: ' 👑'; }
+
+/* Staggered suspense reveal: rows start hidden, animate in one at a time
+   (lowest bid first), and the winner gets an extra gold flash once its
+   count-up finishes. */
+.reveal-row.pending-reveal {
+  animation: none;
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
+}
+.reveal-row.revealed {
+  animation: reveal-row-in 0.4s cubic-bezier(.25,.8,.3,1) forwards;
+}
+@keyframes reveal-row-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reveal-row.winner-flash { animation: winner-flash-pop 0.7s ease; }
+@keyframes winner-flash-pop {
+  0% { transform: scale(1); box-shadow: 0 0 0 4px var(--gold) inset; }
+  35% { transform: scale(1.07); box-shadow: 0 0 0 6px var(--gold) inset, 0 0 26px 6px rgba(245,166,35,0.65); }
+  100% { transform: scale(1); box-shadow: 0 0 0 4px var(--gold) inset; }
+}
 
 .effect-stage {
   min-height: 260px;
